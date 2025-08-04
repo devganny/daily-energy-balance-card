@@ -8,41 +8,6 @@ window.customCards.push({
     description: "A modern, responsive custom card for displaying daily energy balance"
 });
 
-// Example configuration for Home Assistant
-function DailyEnergyBalanceCard() {
-    return {
-        type: "custom:daily-energy-balance-card",
-        title: "Daily Energy Balance",
-        entities: {
-            pv: "sensor.energy_solar",
-            purchase: "sensor.energy_grid_in",
-            discharge: "sensor.energy_battery_out",
-            house: "sensor.energy_consumption_daily",
-            car: "sensor.car_consumption",
-            sale: "sensor.energy_grid_out",
-            charge: "sensor.energy_battery_in"
-        },
-        labels: {
-            pv: "PV",
-            purchase: "Purchase",
-            discharge: "Battery",
-            house: "House",
-            car: "Car",
-            sale: "Sale",
-            charge: "Battery"
-        },
-        colors: {
-            pv: "#f39c12",
-            purchase: "#e74c3c",
-            discharge: "#27ae60",
-            house: "#3498db",
-            car: "#9b59b6",
-            sale: "#e67e22",
-            charge: "#2ecc71"
-        }
-    };
-}
-
 // Direct render function for test file
 function renderEnergyCard(config, hass, containerHeight = 400) {
     const data = {};
@@ -299,8 +264,8 @@ function renderEnergyCard(config, hass, containerHeight = 400) {
     `;
 }
 
-// Simple custom element for Home Assistant
-class DailyEnergyBalanceCardElement extends HTMLElement {
+// Custom Element for Home Assistant
+class DailyEnergyBalanceCard extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
@@ -334,11 +299,5 @@ class DailyEnergyBalanceCardElement extends HTMLElement {
     }
 }
 
-// Register custom element when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        customElements.define('daily-energy-balance-card', DailyEnergyBalanceCardElement);
-    });
-} else {
-    customElements.define('daily-energy-balance-card', DailyEnergyBalanceCardElement);
-} 
+// Register custom element immediately
+customElements.define('daily-energy-balance-card', DailyEnergyBalanceCard); 

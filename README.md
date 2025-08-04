@@ -1,4 +1,5 @@
 # Daily Energy Balance Card für Home Assistant
+# Daily Energy Balance Card for Home Assistant
 
 [🇩🇪 Deutsch](#deutsch) | [🇺🇸 English](#english)
 
@@ -60,11 +61,17 @@ title: "Daily Energy Balance"
 # Alle Entities sind optional - Standard-Sensoren werden automatisch verwendet
 ```
 
+#### Minimale Konfiguration (empfohlen)
+
+```yaml
+type: custom:daily-energy-balance-card
+```
+
 #### Vollständige Konfiguration
 
 ```yaml
 type: custom:daily-energy-balance-card
-title: "Tägliche Energiebilanz"
+title: "Daily Energy Balance"
 entities:
   pv: sensor.energy_solar
   purchase: sensor.energy_grid_in
@@ -75,12 +82,12 @@ entities:
   charge: sensor.energy_battery_in
 labels:
   pv: "PV"
-  purchase: "Purchase"
-  discharge: "Battery"
-  house: "House"
-  car: "Car"
-  sale: "Sale"
-  charge: "Battery"
+  purchase: "Kauf"
+  discharge: "Batterie"
+  house: "Haus"
+  car: "Auto"
+  sale: "Verkauf"
+  charge: "Batterie"
 colors:
   pv: "#f39c12"
   purchase: "#e74c3c"
@@ -126,12 +133,12 @@ Die Labels können benutzerdefiniert angepasst werden:
 ```yaml
 labels:
   pv: "Solar"
-  purchase: "Grid In"
-  discharge: "Battery Out"
-  house: "Consumption"
-  car: "Car"
-  sale: "Grid Out"
-  charge: "Battery In"
+  purchase: "Netzbezug"
+  discharge: "Batterie-Entladung"
+  house: "Verbrauch"
+  car: "Auto"
+  sale: "Netzeinspeisung"
+  charge: "Batterie-Ladung"
 ```
 
 ### Home Assistant Standard-Farben
@@ -151,15 +158,15 @@ colors:
 
 Die Card zeigt eine intuitive Darstellung der Energiebilanz:
 
-#### **Upper bars** (Energy sources):
-- **PV** (Orange) - Photovoltaic generation
-- **Purchase** (Red) - Grid purchase
-- **Battery** (Green) - Battery discharge
+#### **Obere Balken** (Energiequellen):
+- **PV** (Orange) - Photovoltaik-Erzeugung
+- **Kauf** (Rot) - Netzbezug
+- **Batterie** (Grün) - Batterie-Entladung
 
-#### **Lower bars** (Energy consumption):
-- **House** (Blue) - House consumption
-- **Sale** (Orange-red) - Grid feed-in
-- **Battery** (Light green) - Battery charging
+#### **Untere Balken** (Energieverbrauch):
+- **Haus** (Blau) - Hausverbrauch
+- **Verkauf** (Orange-Rot) - Netzeinspeisung
+- **Batterie** (Hellgrün) - Batterie-Ladung
 
 #### **Intelligente Features:**
 - **Dynamische Nullinie** - positioniert sich automatisch basierend auf den Daten
@@ -292,6 +299,12 @@ frontend:
 type: custom:daily-energy-balance-card
 title: "Daily Energy Balance"
 # All entities are optional - default sensors are used automatically
+```
+
+#### Minimal Configuration (recommended)
+
+```yaml
+type: custom:daily-energy-balance-card
 ```
 
 #### Complete Configuration
