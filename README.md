@@ -1,4 +1,5 @@
 # Daily Energy Balance Card für Home Assistant
+# Daily Energy Balance Card for Home Assistant
 
 [🇩🇪 Deutsch](#deutsch) | [🇺🇸 English](#english)
 
@@ -101,7 +102,8 @@ style: |
 | Option | Typ | Standard | Beschreibung |
 |--------|-----|----------|--------------|
 | `title` | string | "Daily Energy Balance" | Titel der Card |
-| `entities` | object | - | Entity-IDs für verschiedene Energiequellen |
+| `entities` | object | Standard-Sensoren | Entity-IDs für verschiedene Energiequellen |
+| `labels` | object | Standard-Labels | Benutzerdefinierte Labels für die Balken |
 | `colors` | object | Home Assistant Standard | Farben für die Balken |
 
 ### Entity-Konfiguration
@@ -117,6 +119,21 @@ Die Card verwendet standardmäßig folgende Sensoren (alle optional):
 - **`charge`**: `sensor.energy_battery_in` - Batterie-Ladung (kWh)
 
 **Hinweis:** Alle Entities sind optional. Falls nicht angegeben, werden die Standard-Sensoren verwendet.
+
+### Label-Konfiguration
+
+Die Labels können benutzerdefiniert angepasst werden:
+
+```yaml
+labels:
+  pv: "Solar"
+  purchase: "Grid In"
+  discharge: "Battery Out"
+  house: "Consumption"
+  car: "Car"
+  sale: "Grid Out"
+  charge: "Battery In"
+```
 
 ### Home Assistant Standard-Farben
 
@@ -319,7 +336,8 @@ style: |
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `title` | string | "Daily Energy Balance" | Card title |
-| `entities` | object | - | Entity IDs for various energy sources |
+| `entities` | object | Default sensors | Entity IDs for various energy sources |
+| `labels` | object | Default labels | Custom labels for the bars |
 | `colors` | object | Home Assistant Standard | Colors for the bars |
 
 ### Entity Configuration
@@ -335,6 +353,21 @@ The card uses the following default sensors (all optional):
 - **`charge`**: `sensor.energy_battery_in` - Battery charge (kWh)
 
 **Note:** All entities are optional. If not specified, default sensors are used.
+
+### Label Configuration
+
+The labels can be customized:
+
+```yaml
+labels:
+  pv: "Solar"
+  purchase: "Grid In"
+  discharge: "Battery Out"
+  house: "Consumption"
+  car: "Car"
+  sale: "Grid Out"
+  charge: "Battery In"
+```
 
 ### Home Assistant Standard Colors
 

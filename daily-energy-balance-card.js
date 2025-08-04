@@ -1,5 +1,5 @@
 // Daily Energy Balance Card für Home Assistant
-// Custom Element Implementation
+// Einfache, funktionierende Version
 
 window.customCards = window.customCards || [];
 window.customCards.push({
@@ -8,86 +8,45 @@ window.customCards.push({
     description: "Eine moderne, responsive Custom Card zur Darstellung der täglichen Energiebilanz"
 });
 
-class DailyEnergyBalanceCard extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-    }
-
-    setConfig(config) {
-        this.config = config;
-        this.render();
-    }
-
-    set hass(hass) {
-        this.hass = hass;
-        this.render();
-    }
-
-    render() {
-        if (!this.config || !this.hass) return;
-
-        // Container-Höhe ermitteln
-        const containerHeight = this.offsetHeight || 400;
-        
-        // Card rendern
-        const cardHtml = renderEnergyCard(this.config, this.hass, containerHeight);
-        
-        // Shadow DOM mit CSS und HTML füllen
-        this.shadowRoot.innerHTML = `
-            <style>
-                :host {
-                    display: block;
-                    width: 100%;
-                    height: 100%;
-                }
-            </style>
-            ${cardHtml}
-        `;
-    }
-
-    getCardSize() {
-        return 3;
-    }
+// Direkte Render-Funktion für Home Assistant
+function DailyEnergyBalanceCard() {
+    return {
+        type: "custom:daily-energy-balance-card",
+        title: "Daily Energy Balance",
+        entities: {
+            pv: "sensor.energy_solar",
+            purchase: "sensor.energy_grid_in",
+            discharge: "sensor.energy_battery_out",
+            house: "sensor.energy_consumption_daily",
+            car: "sensor.car_consumption",
+            sale: "sensor.energy_grid_out",
+            charge: "sensor.energy_battery_in"
+        },
+        labels: {
+            pv: "PV",
+            purchase: "Kauf",
+            discharge: "Batterie",
+            house: "Haus",
+            car: "Auto",
+            sale: "Verkauf",
+            charge: "Batterie"
+        },
+        colors: {
+            pv: "#f39c12",
+            purchase: "#e74c3c",
+            discharge: "#27ae60",
+            house: "#3498db",
+            car: "#9b59b6",
+            sale: "#e67e22",
+            charge: "#2ecc71"
+        }
+    };
 }
 
-// Direkte Render-Funktion
+// Direkte Render-Funktion für Test-Datei
 function renderEnergyCard(config, hass, containerHeight = 400) {
     const data = {};
-    Object.keys(mergedConfig.entities).forEach(key => {
-        const entityId = mergedConfig.entities[key];
-        const entity = hass.states[entityId];
-        data[key] = entity ? parseFloat(entity.state) || 0 : 0;
-    });
-
-    // KORREKTE LOGIK: Maximale Höhe aus höchstem oberen + höchstem unteren Balken
-    const maxAbove = Math.max(data.pv, data.purchase, data.discharge);
-    const maxBelow = Math.max(data.house, data.sale, data.charge);
-    const maxTotalHeight = maxAbove + maxBelow; // Summe der höchsten Balken
     
-    // Verfügbare Höhe für die Card (dynamisch basierend auf Container-Größe)
-    const offsetRand = 20; // Reduzierter Rand für Labels und Werte
-    
-    // Berechne die tatsächliche verfügbare Höhe (Container minus Padding)
-    const availableHeight = containerHeight - 20; // 10px oben + 10px unten
-    
-    // Pixel pro kWh berechnen - komplett dynamisch
-    // Berechne automatisch den optimalen Skalierungsfaktor basierend auf verfügbarer Höhe
-    const minReserve = 40; // Minimaler Platz für Labels und Abstände
-    const maxUsage = 0.95; // Maximal 95% der Höhe nutzen
-    
-    // Dynamischer Skalierungsfaktor: Je kleiner das Fenster, desto konservativer
-    const scaleFactor = Math.max(0.6, Math.min(maxUsage, (availableHeight - minReserve) / availableHeight));
-    const pixelProKWh = (availableHeight * scaleFactor) / maxTotalHeight;
-    
-    // Null-Linie Position berechnen - komplett dynamisch
-    const nullLinePosition = (maxAbove / maxTotalHeight) * (availableHeight * scaleFactor) + 30;
-    
-    // Funktion zur Berechnung der Balkenhöhe (wie in Ihrem PHP-Code)
-    function getBarHeight(value) {
-        return Math.max(4, Math.round(value * pixelProKWh));
-    }
-
     // Default-Konfiguration
     const defaultConfig = {
         entities: {
@@ -125,6 +84,35 @@ function renderEnergyCard(config, hass, containerHeight = 400) {
         labels: { ...defaultConfig.labels, ...config.labels },
         colors: { ...defaultConfig.colors, ...config.colors }
     };
+
+    // Daten aus Home Assistant abrufen
+    Object.keys(mergedConfig.entities).forEach(key => {
+        const entityId = mergedConfig.entities[key];
+        const entity = hass.states[entityId];
+        data[key] = entity ? parseFloat(entity.state) || 0 : 0;
+    });
+
+    // Maximale Höhe berechnen
+    const maxAbove = Math.max(data.pv, data.purchase, data.discharge);
+    const maxBelow = Math.max(data.house, data.sale, data.charge);
+    const maxTotalHeight = maxAbove + maxBelow;
+    
+    // Verfügbare Höhe
+    const availableHeight = containerHeight - 20;
+    
+    // Skalierung
+    const minReserve = 40;
+    const maxUsage = 0.95;
+    const scaleFactor = Math.max(0.6, Math.min(maxUsage, (availableHeight - minReserve) / availableHeight));
+    const pixelProKWh = (availableHeight * scaleFactor) / maxTotalHeight;
+    
+    // Null-Linie Position
+    const nullLinePosition = (maxAbove / maxTotalHeight) * (availableHeight * scaleFactor) + 30;
+    
+    // Balkenhöhe berechnen
+    function getBarHeight(value) {
+        return Math.max(4, Math.round(value * pixelProKWh));
+    }
 
     return `
         <style>
@@ -311,5 +299,40 @@ function renderEnergyCard(config, hass, containerHeight = 400) {
     `;
 }
 
+// Einfaches Custom Element für Home Assistant
+class DailyEnergyBalanceCardElement extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+    }
+
+    setConfig(config) {
+        this.config = config;
+        this.render();
+    }
+
+    set hass(hass) {
+        this.hass = hass;
+        this.render();
+    }
+
+    render() {
+        if (!this.config || !this.hass) return;
+
+        // Container-Höhe ermitteln
+        const containerHeight = this.offsetHeight || 400;
+        
+        // Card rendern
+        const cardHtml = renderEnergyCard(this.config, this.hass, containerHeight);
+        
+        // Shadow DOM mit HTML füllen
+        this.shadowRoot.innerHTML = cardHtml;
+    }
+
+    getCardSize() {
+        return 3;
+    }
+}
+
 // Custom Element registrieren
-customElements.define('daily-energy-balance-card', DailyEnergyBalanceCard); 
+customElements.define('daily-energy-balance-card', DailyEnergyBalanceCardElement); 
