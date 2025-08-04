@@ -1,4 +1,5 @@
 # Daily Energy Balance Card für Home Assistant
+# Daily Energy Balance Card for Home Assistant
 
 [🇩🇪 Deutsch](#deutsch) | [🇺🇸 English](#english)
 
@@ -57,22 +58,7 @@ frontend:
 ```yaml
 type: custom:daily-energy-balance-card
 title: "Daily Energy Balance"
-entities:
-  pv: sensor.pv_generation
-  purchase: sensor.grid_purchase
-  discharge: sensor.battery_discharge
-  house: sensor.house_consumption
-  car: sensor.car_consumption
-  sale: sensor.grid_sale
-  charge: sensor.battery_charge
-colors:
-  pv: "#f39c12"        # Orange für PV
-  purchase: "#e74c3c"   # Rot für Netzbezug
-  discharge: "#27ae60"  # Grün für Batterie-Entladung
-  house: "#3498db"      # Blau für Hausverbrauch
-  car: "#9b59b6"        # Lila für Auto
-  sale: "#e67e22"       # Orange-Rot für Netzeinspeisung
-  charge: "#2ecc71"     # Hellgrün für Batterie-Ladung
+# Alle Entities sind optional - Standard-Sensoren werden automatisch verwendet
 ```
 
 #### Vollständige Konfiguration
@@ -81,13 +67,21 @@ colors:
 type: custom:daily-energy-balance-card
 title: "Tägliche Energiebilanz"
 entities:
-  pv: sensor.pv_generation
-  purchase: sensor.grid_purchase
-  discharge: sensor.battery_discharge
-  house: sensor.house_consumption
+  pv: sensor.energy_solar
+  purchase: sensor.energy_grid_in
+  discharge: sensor.energy_battery_out
+  house: sensor.energy_consumption_daily
   car: sensor.car_consumption
-  sale: sensor.grid_sale
-  charge: sensor.battery_charge
+  sale: sensor.energy_grid_out
+  charge: sensor.energy_battery_in
+labels:
+  pv: "PV"
+  purchase: "Kauf"
+  discharge: "Batterie"
+  house: "Haus"
+  car: "Auto"
+  sale: "Verkauf"
+  charge: "Batterie"
 colors:
   pv: "#f39c12"
   purchase: "#e74c3c"
@@ -113,15 +107,17 @@ style: |
 
 ### Entity-Konfiguration
 
-Die Card erwartet folgende Sensoren:
+Die Card verwendet standardmäßig folgende Sensoren (alle optional):
 
-- **`pv`**: Photovoltaik-Erzeugung (kWh)
-- **`purchase`**: Netzbezug (kWh)
-- **`discharge`**: Batterie-Entladung (kWh)
-- **`house`**: Hausverbrauch (kWh)
-- **`car`**: Auto-Verbrauch (kWh, optional)
-- **`sale`**: Netzeinspeisung (kWh)
-- **`charge`**: Batterie-Ladung (kWh)
+- **`pv`**: `sensor.energy_solar` - Photovoltaik-Erzeugung (kWh)
+- **`purchase`**: `sensor.energy_grid_in` - Netzbezug (kWh)
+- **`discharge`**: `sensor.energy_battery_out` - Batterie-Entladung (kWh)
+- **`house`**: `sensor.energy_consumption_daily` - Hausverbrauch (kWh)
+- **`car`**: `sensor.car_consumption` - Auto-Verbrauch (kWh, optional)
+- **`sale`**: `sensor.energy_grid_out` - Netzeinspeisung (kWh)
+- **`charge`**: `sensor.energy_battery_in` - Batterie-Ladung (kWh)
+
+**Hinweis:** Alle Entities sind optional. Falls nicht angegeben, werden die Standard-Sensoren verwendet.
 
 ### Home Assistant Standard-Farben
 
@@ -280,22 +276,7 @@ frontend:
 ```yaml
 type: custom:daily-energy-balance-card
 title: "Daily Energy Balance"
-entities:
-  pv: sensor.pv_generation
-  purchase: sensor.grid_purchase
-  discharge: sensor.battery_discharge
-  house: sensor.house_consumption
-  car: sensor.car_consumption
-  sale: sensor.grid_sale
-  charge: sensor.battery_charge
-colors:
-  pv: "#f39c12"        # Orange for PV
-  purchase: "#e74c3c"   # Red for grid purchase
-  discharge: "#27ae60"  # Green for battery discharge
-  house: "#3498db"      # Blue for house consumption
-  car: "#9b59b6"        # Purple for car
-  sale: "#e67e22"       # Orange-red for grid sale
-  charge: "#2ecc71"     # Light green for battery charge
+# All entities are optional - default sensors are used automatically
 ```
 
 #### Complete Configuration
@@ -304,13 +285,21 @@ colors:
 type: custom:daily-energy-balance-card
 title: "Daily Energy Balance"
 entities:
-  pv: sensor.pv_generation
-  purchase: sensor.grid_purchase
-  discharge: sensor.battery_discharge
-  house: sensor.house_consumption
+  pv: sensor.energy_solar
+  purchase: sensor.energy_grid_in
+  discharge: sensor.energy_battery_out
+  house: sensor.energy_consumption_daily
   car: sensor.car_consumption
-  sale: sensor.grid_sale
-  charge: sensor.battery_charge
+  sale: sensor.energy_grid_out
+  charge: sensor.energy_battery_in
+labels:
+  pv: "PV"
+  purchase: "Purchase"
+  discharge: "Battery"
+  house: "House"
+  car: "Car"
+  sale: "Sale"
+  charge: "Battery"
 colors:
   pv: "#f39c12"
   purchase: "#e74c3c"
@@ -336,15 +325,17 @@ style: |
 
 ### Entity Configuration
 
-The card expects the following sensors:
+The card uses the following default sensors (all optional):
 
-- **`pv`**: Photovoltaic generation (kWh)
-- **`purchase`**: Grid purchase (kWh)
-- **`discharge`**: Battery discharge (kWh)
-- **`house`**: House consumption (kWh)
-- **`car`**: Car consumption (kWh, optional)
-- **`sale`**: Grid sale (kWh)
-- **`charge`**: Battery charge (kWh)
+- **`pv`**: `sensor.energy_solar` - Photovoltaic generation (kWh)
+- **`purchase`**: `sensor.energy_grid_in` - Grid purchase (kWh)
+- **`discharge`**: `sensor.energy_battery_out` - Battery discharge (kWh)
+- **`house`**: `sensor.energy_consumption_daily` - House consumption (kWh)
+- **`car`**: `sensor.car_consumption` - Car consumption (kWh, optional)
+- **`sale`**: `sensor.energy_grid_out` - Grid sale (kWh)
+- **`charge`**: `sensor.energy_battery_in` - Battery charge (kWh)
+
+**Note:** All entities are optional. If not specified, default sensors are used.
 
 ### Home Assistant Standard Colors
 

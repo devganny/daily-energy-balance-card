@@ -96,13 +96,13 @@
         // Mock Home Assistant Objekt
         const mockHass = {
             states: {
-                'sensor.pv_generation': { state: '25.9' },
-                'sensor.grid_purchase': { state: '0.2' },
-                'sensor.battery_discharge': { state: '5.9' },
-                'sensor.house_consumption': { state: '18.3' },
+                'sensor.energy_solar': { state: '25.9' },
+                'sensor.energy_grid_in': { state: '0.2' },
+                'sensor.energy_battery_out': { state: '5.9' },
+                'sensor.energy_consumption_daily': { state: '18.3' },
                 'sensor.car_consumption': { state: '0.0' },
-                'sensor.grid_sale': { state: '4.2' },
-                'sensor.battery_charge': { state: '9.3' }
+                'sensor.energy_grid_out': { state: '4.2' },
+                'sensor.energy_battery_in': { state: '9.3' }
             }
         };
 
@@ -110,13 +110,22 @@
         const cardConfig = {
             title: 'Daily Energy Balance',
             entities: {
-                pv: 'sensor.pv_generation',
-                purchase: 'sensor.grid_purchase',
-                discharge: 'sensor.battery_discharge',
-                house: 'sensor.house_consumption',
+                pv: 'sensor.energy_solar',
+                purchase: 'sensor.energy_grid_in',
+                discharge: 'sensor.energy_battery_out',
+                house: 'sensor.energy_consumption_daily',
                 car: 'sensor.car_consumption',
-                sale: 'sensor.grid_sale',
-                charge: 'sensor.battery_charge'
+                sale: 'sensor.energy_grid_out',
+                charge: 'sensor.energy_battery_in'
+            },
+            labels: {
+                pv: 'PV',
+                purchase: 'Kauf',
+                discharge: 'Batterie',
+                house: 'Haus',
+                car: 'Auto',
+                sale: 'Verkauf',
+                charge: 'Batterie'
             },
             colors: {
                 pv: '#f39c12',        // Orange für PV

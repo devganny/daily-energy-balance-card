@@ -1,43 +1,61 @@
-// Energy Distribution Card - Correct Version
-// Für Home Assistant über HACS
+// Daily Energy Balance Card für Home Assistant
+// Custom Element Implementation
 
 window.customCards = window.customCards || [];
 window.customCards.push({
-    type: "energy-distribution-correct",
-    name: "Energy Distribution Correct",
-    description: "Energieverteilung - korrekte Version mit Stapel-Logik"
+    type: "daily-energy-balance-card",
+    name: "Daily Energy Balance Card",
+    description: "Eine moderne, responsive Custom Card zur Darstellung der täglichen Energiebilanz"
 });
 
-function EnergyDistributionCorrect() {
-    return {
-        type: "custom:energy-distribution-correct",
-        title: "Energie heute (kWh)",
-        entities: {
-            pv: "sensor.pv_generation",
-            purchase: "sensor.grid_purchase", 
-            discharge: "sensor.battery_discharge",
-            house: "sensor.house_consumption",
-            car: "sensor.car_consumption",
-            sale: "sensor.grid_sale",
-            charge: "sensor.battery_charge"
-        },
-        colors: {
-            pv: "#FFD700",
-            purchase: "#FF4444",
-            discharge: "#44FF44",
-            house: "#FFFFFF",
-            car: "#CCCCCC",
-            sale: "#FF6666",
-            charge: "#66FF66"
-        }
-    };
+class DailyEnergyBalanceCard extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+    }
+
+    setConfig(config) {
+        this.config = config;
+        this.render();
+    }
+
+    set hass(hass) {
+        this.hass = hass;
+        this.render();
+    }
+
+    render() {
+        if (!this.config || !this.hass) return;
+
+        // Container-Höhe ermitteln
+        const containerHeight = this.offsetHeight || 400;
+        
+        // Card rendern
+        const cardHtml = renderEnergyCard(this.config, this.hass, containerHeight);
+        
+        // Shadow DOM mit CSS und HTML füllen
+        this.shadowRoot.innerHTML = `
+            <style>
+                :host {
+                    display: block;
+                    width: 100%;
+                    height: 100%;
+                }
+            </style>
+            ${cardHtml}
+        `;
+    }
+
+    getCardSize() {
+        return 3;
+    }
 }
 
 // Direkte Render-Funktion
 function renderEnergyCard(config, hass, containerHeight = 400) {
     const data = {};
-    Object.keys(config.entities).forEach(key => {
-        const entityId = config.entities[key];
+    Object.keys(mergedConfig.entities).forEach(key => {
+        const entityId = mergedConfig.entities[key];
         const entity = hass.states[entityId];
         data[key] = entity ? parseFloat(entity.state) || 0 : 0;
     });
@@ -70,6 +88,44 @@ function renderEnergyCard(config, hass, containerHeight = 400) {
         return Math.max(4, Math.round(value * pixelProKWh));
     }
 
+    // Default-Konfiguration
+    const defaultConfig = {
+        entities: {
+            pv: "sensor.energy_solar",
+            purchase: "sensor.energy_grid_in",
+            discharge: "sensor.energy_battery_out",
+            house: "sensor.energy_consumption_daily",
+            car: "sensor.car_consumption",
+            sale: "sensor.energy_grid_out",
+            charge: "sensor.energy_battery_in"
+        },
+        labels: {
+            pv: "PV",
+            purchase: "Kauf",
+            discharge: "Batterie",
+            house: "Haus",
+            car: "Auto",
+            sale: "Verkauf",
+            charge: "Batterie"
+        },
+        colors: {
+            pv: "#f39c12",
+            purchase: "#e74c3c",
+            discharge: "#27ae60",
+            house: "#3498db",
+            car: "#9b59b6",
+            sale: "#e67e22",
+            charge: "#2ecc71"
+        }
+    };
+
+    // Konfiguration mit Defaults zusammenführen
+    const mergedConfig = {
+        entities: { ...defaultConfig.entities, ...config.entities },
+        labels: { ...defaultConfig.labels, ...config.labels },
+        colors: { ...defaultConfig.colors, ...config.colors }
+    };
+
     return `
         <style>
             .energy-card {
@@ -83,8 +139,6 @@ function renderEnergyCard(config, hass, containerHeight = 400) {
                 display: flex;
                 flex-direction: column;
             }
-            
-
             
             .chart-container {
                 position: relative;
@@ -204,55 +258,58 @@ function renderEnergyCard(config, hass, containerHeight = 400) {
                     <div class="bar-group above">
                         <div class="bar above" style="
                             height: ${getBarHeight(data.pv)}px;
-                            background: ${config.colors.pv};
+                            background: ${mergedConfig.colors.pv};
                         "></div>
                         <div class="bar-value above">${data.pv.toFixed(1)}</div>
-                        <div class="bar-label">PV</div>
+                        <div class="bar-label">${mergedConfig.labels.pv}</div>
                     </div>
                     <div class="bar-group above">
                         <div class="bar above" style="
                             height: ${getBarHeight(data.purchase)}px;
-                            background: ${config.colors.purchase};
+                            background: ${mergedConfig.colors.purchase};
                         "></div>
                         <div class="bar-value above">${data.purchase.toFixed(1)}</div>
-                        <div class="bar-label">Kauf</div>
+                        <div class="bar-label">${mergedConfig.labels.purchase}</div>
                     </div>
                     <div class="bar-group above">
                         <div class="bar above" style="
                             height: ${getBarHeight(data.discharge)}px;
-                            background: ${config.colors.discharge};
+                            background: ${mergedConfig.colors.discharge};
                         "></div>
                         <div class="bar-value above">${data.discharge.toFixed(1)}</div>
-                        <div class="bar-label">Entladen</div>
+                        <div class="bar-label">${mergedConfig.labels.discharge}</div>
                     </div>
                 </div>
                 <div class="bars-container below">
-                    <div class="bar-group">
+                    <div class="bar-group below">
                         <div class="bar below" style="
                             height: ${getBarHeight(data.house)}px;
-                            background: ${config.colors.house};
+                            background: ${mergedConfig.colors.house};
                         "></div>
-                        <div class="bar-label">Haus</div>
                         <div class="bar-value below">${data.house.toFixed(1)}</div>
+                        <div class="bar-label">${mergedConfig.labels.house}</div>
                     </div>
-                    <div class="bar-group">
+                    <div class="bar-group below">
                         <div class="bar below" style="
                             height: ${getBarHeight(data.sale)}px;
-                            background: ${config.colors.sale};
+                            background: ${mergedConfig.colors.sale};
                         "></div>
-                        <div class="bar-label">Verkauf</div>
                         <div class="bar-value below">${data.sale.toFixed(1)}</div>
+                        <div class="bar-label">${mergedConfig.labels.sale}</div>
                     </div>
-                    <div class="bar-group">
+                    <div class="bar-group below">
                         <div class="bar below" style="
                             height: ${getBarHeight(data.charge)}px;
-                            background: ${config.colors.charge};
+                            background: ${mergedConfig.colors.charge};
                         "></div>
-                        <div class="bar-label">Laden</div>
                         <div class="bar-value below">${data.charge.toFixed(1)}</div>
+                        <div class="bar-label">${mergedConfig.labels.charge}</div>
                     </div>
                 </div>
             </div>
         </div>
     `;
-} 
+}
+
+// Custom Element registrieren
+customElements.define('daily-energy-balance-card', DailyEnergyBalanceCard); 
