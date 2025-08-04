@@ -1,6 +1,9 @@
 // Daily Energy Balance Card for Home Assistant
-// Simple, working version
+// Enhanced version with better error handling
 
+console.log('Loading Daily Energy Balance Card...');
+
+// Register with customCards for HACS
 window.customCards = window.customCards || [];
 window.customCards.push({
     type: "daily-energy-balance-card",
@@ -10,6 +13,8 @@ window.customCards.push({
 
 // Direct render function for test file
 function renderEnergyCard(config, hass, containerHeight = 400) {
+    console.log('renderEnergyCard called with:', { config, containerHeight });
+    
     const data = {};
     
     // Default configuration
@@ -45,22 +50,27 @@ function renderEnergyCard(config, hass, containerHeight = 400) {
 
     // Merge configuration with defaults
     const mergedConfig = {
-        entities: { ...defaultConfig.entities, ...config.entities },
-        labels: { ...defaultConfig.labels, ...config.labels },
-        colors: { ...defaultConfig.colors, ...config.colors }
+        entities: { ...defaultConfig.entities, ...(config.entities || {}) },
+        labels: { ...defaultConfig.labels, ...(config.labels || {}) },
+        colors: { ...defaultConfig.colors, ...(config.colors || {}) }
     };
+
+    console.log('Merged config:', mergedConfig);
 
     // Get data from Home Assistant
     Object.keys(mergedConfig.entities).forEach(key => {
         const entityId = mergedConfig.entities[key];
         const entity = hass.states[entityId];
         data[key] = entity ? parseFloat(entity.state) || 0 : 0;
+        console.log(`Entity ${entityId}: ${data[key]}`);
     });
 
     // Calculate maximum height
     const maxAbove = Math.max(data.pv, data.purchase, data.discharge);
     const maxBelow = Math.max(data.house, data.sale, data.charge);
     const maxTotalHeight = maxAbove + maxBelow;
+    
+    console.log('Calculated heights:', { maxAbove, maxBelow, maxTotalHeight });
     
     // Available height
     const availableHeight = containerHeight - 20;
@@ -69,10 +79,12 @@ function renderEnergyCard(config, hass, containerHeight = 400) {
     const minReserve = 40;
     const maxUsage = 0.95;
     const scaleFactor = Math.max(0.6, Math.min(maxUsage, (availableHeight - minReserve) / availableHeight));
-    const pixelProKWh = (availableHeight * scaleFactor) / maxTotalHeight;
+    const pixelProKWh = maxTotalHeight > 0 ? (availableHeight * scaleFactor) / maxTotalHeight : 1;
     
     // Baseline position
-    const nullLinePosition = (maxAbove / maxTotalHeight) * (availableHeight * scaleFactor) + 30;
+    const nullLinePosition = maxTotalHeight > 0 ? (maxAbove / maxTotalHeight) * (availableHeight * scaleFactor) + 30 : availableHeight / 2;
+    
+    console.log('Scaling:', { availableHeight, scaleFactor, pixelProKWh, nullLinePosition });
     
     // Calculate bar height
     function getBarHeight(value) {
@@ -268,30 +280,48 @@ function renderEnergyCard(config, hass, containerHeight = 400) {
 class DailyEnergyBalanceCard extends HTMLElement {
     constructor() {
         super();
+        console.log('DailyEnergyBalanceCard constructor called');
         this.attachShadow({ mode: 'open' });
     }
 
     setConfig(config) {
+        console.log('setConfig called with:', config);
         this.config = config;
         this.render();
     }
 
     set hass(hass) {
+        console.log('set hass called');
         this.hass = hass;
         this.render();
     }
 
     render() {
-        if (!this.config || !this.hass) return;
+        console.log('render called, config:', this.config, 'hass:', !!this.hass);
+        if (!this.config || !this.hass) {
+            console.log('Missing config or hass, not rendering');
+            return;
+        }
 
-        // Get container height
-        const containerHeight = this.offsetHeight || 400;
-        
-        // Render card
-        const cardHtml = renderEnergyCard(this.config, this.hass, containerHeight);
-        
-        // Fill shadow DOM with HTML
-        this.shadowRoot.innerHTML = cardHtml;
+        try {
+            // Get container height
+            const containerHeight = this.offsetHeight || 400;
+            console.log('Container height:', containerHeight);
+            
+            // Render card
+            const cardHtml = renderEnergyCard(this.config, this.hass, containerHeight);
+            
+            // Fill shadow DOM with HTML
+            this.shadowRoot.innerHTML = cardHtml;
+            console.log('Card rendered successfully');
+        } catch (error) {
+            console.error('Error rendering card:', error);
+            this.shadowRoot.innerHTML = `
+                <div style="padding: 20px; color: red;">
+                    Error rendering Daily Energy Balance Card: ${error.message}
+                </div>
+            `;
+        }
     }
 
     getCardSize() {
@@ -299,5 +329,13 @@ class DailyEnergyBalanceCard extends HTMLElement {
     }
 }
 
-// Register custom element immediately
-customElements.define('daily-energy-balance-card', DailyEnergyBalanceCard); 
+// Register custom element
+console.log('Registering custom element...');
+try {
+    customElements.define('daily-energy-balance-card', DailyEnergyBalanceCard);
+    console.log('Custom element registered successfully');
+} catch (error) {
+    console.error('Error registering custom element:', error);
+}
+
+console.log('Daily Energy Balance Card loaded successfully'); 

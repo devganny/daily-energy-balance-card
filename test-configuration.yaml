@@ -1,0 +1,21 @@
+# Test Configuration for Daily Energy Balance Card
+# Add this to your dashboard configuration
+
+type: custom:daily-energy-balance-card
+title: "Daily Energy Balance"
+entities:
+  pv: sensor.energy_solar
+  purchase: sensor.energy_grid_in
+  discharge: sensor.energy_battery_out
+  house: sensor.energy_consumption_daily
+  car: sensor.car_consumption
+  sale: sensor.energy_grid_out
+  charge: sensor.energy_battery_in
+labels:
+  pv: "PV"
+  purchase: "Kauf"
+  discharge: "Batterie"
+  house: "Haus"
+  car: "Auto"
+  sale: "Verkauf"
+  charge: "Batterie" 
