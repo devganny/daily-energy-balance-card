@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Energy Balance Card Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: var(--background-color, #111);
+            color: var(--text-color, white);
+            margin: 0;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        body.light-theme {
+            --background-color: #f5f5f5;
+            --text-color: #333;
+            --card-background: #ffffff;
+            --card-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            --primary-text-color: #333;
+            --secondary-text-color: #666;
+            --input-background: #f0f0f0;
+        }
+        
+        body.dark-theme {
+            --background-color: #111;
+            --text-color: white;
+            --card-background: linear-gradient(135deg, #2c3e50, #34495e);
+            --card-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            --primary-text-color: white;
+            --secondary-text-color: #bdc3c7;
+            --input-background: #555;
+        }
+        .controls {
+            background: var(--card-background, #333);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            box-shadow: var(--card-shadow, 0 2px 8px rgba(0,0,0,0.3));
+        }
+        .controls input {
+            width: 80px;
+            padding: 5px;
+            border: none;
+            border-radius: 4px;
+            background: var(--input-background, #555);
+            color: var(--text-color, white);
+        }
+        .card-wrapper {
+            background: var(--card-background, #333);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 0;
+            transition: all 0.3s ease;
+            box-shadow: var(--card-shadow, 0 2px 8px rgba(0,0,0,0.3));
+        }
+        button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            background: #007cba;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover { background: #005a87; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Daily Energy Balance Card Test</h1>
+    
+    <div class="controls">
+        <label>Breite:</label>
+        <input type="number" id="width-input" value="800" min="300" max="2000" step="50">
+        <label>Höhe:</label>
+        <input type="number" id="height-input" value="500" min="300" max="1500" step="50">
+        <button onclick="resizeCard()">Größe anwenden</button>
+        <button onclick="updateData()">Daten aktualisieren</button>
+        <button onclick="randomizeData()">Zufällige Daten</button>
+        <button onclick="toggleTheme()" id="theme-toggle">🌙 Dark Mode</button>
+    </div>
+    
+    <div class="card-wrapper" id="card-wrapper">
+        <div style="text-align: center; padding: 50px; color: #666;">
+            Card wird geladen...
+        </div>
+    </div>
+
+    <script src="daily-energy-balance-card.js"></script>
+
+    <script>
+        // Mock Home Assistant Objekt
+        const mockHass = {
+            states: {
+                'sensor.pv_generation': { state: '25.9' },
+                'sensor.grid_purchase': { state: '0.2' },
+                'sensor.battery_discharge': { state: '5.9' },
+                'sensor.house_consumption': { state: '18.3' },
+                'sensor.car_consumption': { state: '0.0' },
+                'sensor.grid_sale': { state: '4.2' },
+                'sensor.battery_charge': { state: '9.3' }
+            }
+        };
+
+        // Card-Konfiguration
+        const cardConfig = {
+            title: 'Daily Energy Balance',
+            entities: {
+                pv: 'sensor.pv_generation',
+                purchase: 'sensor.grid_purchase',
+                discharge: 'sensor.battery_discharge',
+                house: 'sensor.house_consumption',
+                car: 'sensor.car_consumption',
+                sale: 'sensor.grid_sale',
+                charge: 'sensor.battery_charge'
+            },
+            colors: {
+                pv: '#f39c12',        // Orange für PV
+                purchase: '#e74c3c',   // Rot für Netzbezug
+                discharge: '#27ae60',  // Grün für Batterie-Entladung
+                house: '#3498db',      // Blau für Hausverbrauch
+                car: '#9b59b6',        // Lila für Auto
+                sale: '#e67e22',       // Orange-Rot für Netzeinspeisung
+                charge: '#2ecc71'      // Hellgrün für Batterie-Ladung
+            }
+        };
+
+        // Card initialisieren
+        function initCard() {
+            const wrapper = document.getElementById('card-wrapper');
+            
+            // Initiale Größe setzen
+            const width = document.getElementById('width-input').value;
+            const height = document.getElementById('height-input').value;
+            wrapper.style.width = width + 'px';
+            wrapper.style.height = height + 'px';
+            
+            // Card mit Container-Höhe rendern
+            wrapper.innerHTML = renderEnergyCard(cardConfig, mockHass, height);
+            
+            console.log('Card erfolgreich initialisiert!');
+        }
+
+        // Daten aktualisieren
+        function updateData() {
+            const wrapper = document.getElementById('card-wrapper');
+            const height = document.getElementById('height-input').value;
+            wrapper.innerHTML = renderEnergyCard(cardConfig, mockHass, height);
+            console.log('Daten aktualisiert');
+        }
+
+        // Zufällige Daten generieren
+        function randomizeData() {
+            Object.keys(mockHass.states).forEach(key => {
+                mockHass.states[key].state = (Math.random() * 50).toFixed(1);
+            });
+            updateData();
+        }
+
+        // Card-Größe ändern
+        function resizeCard() {
+            const width = document.getElementById('width-input').value;
+            const height = document.getElementById('height-input').value;
+            const wrapper = document.getElementById('card-wrapper');
+            
+            wrapper.style.width = width + 'px';
+            wrapper.style.height = height + 'px';
+            
+            // Card mit neuer Container-Höhe neu rendern
+            wrapper.innerHTML = renderEnergyCard(cardConfig, mockHass, height);
+            
+            console.log('Card-Größe geändert auf:', width + 'x' + height);
+        }
+
+        // Theme-Umschalter
+        function toggleTheme() {
+            const body = document.body;
+            const themeToggle = document.getElementById('theme-toggle');
+            
+            if (body.classList.contains('dark-theme')) {
+                body.classList.remove('dark-theme');
+                body.classList.add('light-theme');
+                themeToggle.textContent = '☀️ Light Mode';
+            } else {
+                body.classList.remove('light-theme');
+                body.classList.add('dark-theme');
+                themeToggle.textContent = '🌙 Dark Mode';
+            }
+            
+            // Card neu rendern um Theme-Änderungen zu übernehmen
+            updateData();
+        }
+
+        // Initialisierung beim Laden der Seite
+        window.addEventListener('load', function() {
+            console.log('Seite geladen');
+            // Standardmäßig Dark Theme
+            document.body.classList.add('dark-theme');
+            initCard();
+        });
+    </script>
+</body>
+</html> 
