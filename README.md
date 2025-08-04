@@ -1,5 +1,4 @@
 # Daily Energy Balance Card für Home Assistant
-# Daily Energy Balance Card for Home Assistant
 
 [🇩🇪 Deutsch](#deutsch) | [🇺🇸 English](#english)
 
