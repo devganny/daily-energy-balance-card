@@ -73,16 +73,16 @@ function renderEnergyCard(config, hass, containerHeight = 400) {
     console.log('Calculated heights:', { maxAbove, maxBelow, maxTotalHeight });
     
     // Available height
-    const availableHeight = containerHeight - 20;
+    const availableHeight = containerHeight - 60;
     
     // Scaling
-    const minReserve = 40;
-    const maxUsage = 0.95;
-    const scaleFactor = Math.max(0.6, Math.min(maxUsage, (availableHeight - minReserve) / availableHeight));
+    const minReserve = 60;
+    const maxUsage = 0.85;
+    const scaleFactor = Math.max(0.5, Math.min(maxUsage, (availableHeight - minReserve) / availableHeight));
     const pixelProKWh = maxTotalHeight > 0 ? (availableHeight * scaleFactor) / maxTotalHeight : 1;
     
     // Baseline position
-    const nullLinePosition = maxTotalHeight > 0 ? (maxAbove / maxTotalHeight) * (availableHeight * scaleFactor) + 30 : availableHeight / 2;
+    const nullLinePosition = maxTotalHeight > 0 ? (maxAbove / maxTotalHeight) * (availableHeight * scaleFactor) + 56 : availableHeight / 2;
     
     console.log('Scaling:', { availableHeight, scaleFactor, pixelProKWh, nullLinePosition });
     
@@ -101,6 +101,7 @@ function renderEnergyCard(config, hass, containerHeight = 400) {
                 color: var(--primary-text-color, white);
                 font-family: 'Roboto', sans-serif;
                 height: 100%;
+                width: 100%;
                 display: flex;
                 flex-direction: column;
             }
@@ -111,6 +112,7 @@ function renderEnergyCard(config, hass, containerHeight = 400) {
                 min-height: ${Math.max(availableHeight, 300)}px;
                 margin: 0;
                 height: 100%;
+                width: 100%;
             }
             
             .baseline {
@@ -145,14 +147,14 @@ function renderEnergyCard(config, hass, containerHeight = 400) {
             
             .bars-container.above {
                 top: 0;
-                height: ${nullLinePosition - 2}px;
+                height: ${nullLinePosition - 3}px;
                 align-items: flex-end;
-                padding-bottom: 26px;
+                padding-bottom: 3px;
             }
             
             .bars-container.below {
                 top: ${nullLinePosition + 2}px;
-                height: ${availableHeight - nullLinePosition - 2}px;
+                height: ${availableHeight - nullLinePosition - 22}px;
                 align-items: flex-start;
                 padding-top: 2px;
             }
@@ -304,11 +306,11 @@ class DailyEnergyBalanceCard extends HTMLElement {
         }
 
         try {
-            // Get container height
-            const containerHeight = this.offsetHeight || 400;
+            // Get container height dynamically
+            const containerHeight = this.offsetHeight || this.clientHeight || 400;
             console.log('Container height:', containerHeight);
             
-            // Render card
+            // Render card with dynamic height
             const cardHtml = renderEnergyCard(this.config, this.hass, containerHeight);
             
             // Fill shadow DOM with HTML
@@ -317,8 +319,10 @@ class DailyEnergyBalanceCard extends HTMLElement {
         } catch (error) {
             console.error('Error rendering card:', error);
             this.shadowRoot.innerHTML = `
-                <div style="padding: 20px; color: red;">
-                    Error rendering Daily Energy Balance Card: ${error.message}
+                <div style="padding: 20px; color: red; background: #2c3e50; border-radius: 12px;">
+                    <h3>Error rendering Daily Energy Balance Card</h3>
+                    <p>${error.message}</p>
+                    <p>Stack: ${error.stack}</p>
                 </div>
             `;
         }

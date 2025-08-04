@@ -7,68 +7,34 @@
 
 ## 🇩🇪 Deutsch
 
-Eine moderne, responsive Custom Card für Home Assistant zur dynamischen Darstellung der täglichen Energiebilanz in Ihrem Haushalt.
+### 🚀 Installation
 
-### 🚀 Features
+#### Option 1: HACS (Empfohlen)
+1. Stellen Sie sicher, dass [HACS](https://hacs.xyz/) installiert ist
+2. Fügen Sie dieses Repository zu HACS hinzu
+3. Suchen Sie nach "Daily Energy Balance Card" in HACS
+4. Klicken Sie auf "Download"
+5. Starten Sie Home Assistant neu
 
-- **Dynamische Balkendiagramme** mit automatisch positionierter Nullinie
-- **Responsive Design** - passt sich automatisch an alle Fenstergrößen an
-- **Home Assistant Theme-Erkennung** - automatische Anpassung an helles/dunkles Schema
-- **Intelligente Skalierung** - optimale Platzausnutzung ohne Überläufe
-- **Home Assistant Standard-Farben** für intuitive Farbkodierung
-- **Keine Legende oder Zusammenfassung** - maximale Platzausnutzung für die Balken
-- **Smooth Hover-Effekte** für bessere Benutzerinteraktion
-
-### 📦 Installation
-
-#### Über HACS (Empfohlen)
-
-1. **HACS installieren** (falls noch nicht geschehen):
-   - Gehen Sie zu [HACS](https://hacs.xyz/) und folgen Sie der Installationsanleitung
-
-2. **Custom Repository hinzufügen**:
-   - Öffnen Sie HACS in Home Assistant
-   - Gehen Sie zu "Frontend" → "Custom Repositories"
-   - Fügen Sie dieses Repository hinzu
-
-3. **Card installieren**:
-   - Suchen Sie nach "Daily Energy Balance Card"
-   - Klicken Sie auf "Download"
-   - Starten Sie Home Assistant neu
-
-#### Manuelle Installation
-
-1. **Datei herunterladen**:
-   - Laden Sie `daily-energy-balance-card.js` herunter
-
-2. **In Home Assistant einbinden**:
-   - Kopieren Sie die Datei in den `www/` Ordner Ihres Home Assistant
-   - Fügen Sie folgendes zu Ihrer `configuration.yaml` hinzu:
-
+#### Option 2: Manuelle Installation
+1. Laden Sie `daily-energy-balance-card.js` herunter
+2. Kopieren Sie die Datei in `/config/www/`
+3. Fügen Sie zu Ihrer `configuration.yaml` hinzu:
 ```yaml
 frontend:
   extra_module_url:
     - /local/daily-energy-balance-card.js
 ```
+4. Starten Sie Home Assistant neu
 
-### ⚙️ Konfiguration
+### 📋 Konfiguration
 
-#### Basis-Konfiguration
-
-```yaml
-type: custom:daily-energy-balance-card
-title: "Daily Energy Balance"
-# Alle Entities sind optional - Standard-Sensoren werden automatisch verwendet
-```
-
-#### Minimale Konfiguration (empfohlen)
-
+#### Minimale Konfiguration
 ```yaml
 type: custom:daily-energy-balance-card
 ```
 
 #### Vollständige Konfiguration
-
 ```yaml
 type: custom:daily-energy-balance-card
 title: "Daily Energy Balance"
@@ -88,19 +54,6 @@ labels:
   car: "Auto"
   sale: "Verkauf"
   charge: "Batterie"
-colors:
-  pv: "#f39c12"
-  purchase: "#e74c3c"
-  discharge: "#27ae60"
-  house: "#3498db"
-  car: "#9b59b6"
-  sale: "#e67e22"
-  charge: "#2ecc71"
-style: |
-  ha-card {
-    width: 100%;
-    height: 400px;
-  }
 ```
 
 ### 🔧 Konfigurationsoptionen
@@ -110,19 +63,18 @@ style: |
 | `title` | string | "Daily Energy Balance" | Titel der Card |
 | `entities` | object | Standard-Sensoren | Entity-IDs für verschiedene Energiequellen |
 | `labels` | object | Standard-Labels | Benutzerdefinierte Labels für die Balken |
-| `colors` | object | Home Assistant Standard | Farben für die Balken |
 
 ### Entity-Konfiguration
 
 Die Card verwendet standardmäßig folgende Sensoren (alle optional):
 
-- **`pv`**: `sensor.energy_solar` - Photovoltaic generation (kWh)
-- **`purchase`**: `sensor.energy_grid_in` - Grid purchase (kWh)
-- **`discharge`**: `sensor.energy_battery_out` - Battery discharge (kWh)
-- **`house`**: `sensor.energy_consumption_daily` - House consumption (kWh)
-- **`car`**: `sensor.car_consumption` - Car consumption (kWh, optional)
-- **`sale`**: `sensor.energy_grid_out` - Grid feed-in (kWh)
-- **`charge`**: `sensor.energy_battery_in` - Battery charging (kWh)
+- **`pv`**: `sensor.energy_solar` - Photovoltaik-Erzeugung (kWh)
+- **`purchase`**: `sensor.energy_grid_in` - Netzbezug (kWh)
+- **`discharge`**: `sensor.energy_battery_out` - Batterie-Entladung (kWh)
+- **`house`**: `sensor.energy_consumption_daily` - Hausverbrauch (kWh)
+- **`car`**: `sensor.car_consumption` - Auto-Verbrauch (kWh, optional)
+- **`sale`**: `sensor.energy_grid_out` - Netzeinspeisung (kWh)
+- **`charge`**: `sensor.energy_battery_in` - Batterie-Ladung (kWh)
 
 **Hinweis:** Alle Entities sind optional. Falls nicht angegeben, werden die Standard-Sensoren verwendet.
 
@@ -139,19 +91,6 @@ labels:
   car: "Auto"
   sale: "Netzeinspeisung"
   charge: "Batterie-Ladung"
-```
-
-### Home Assistant Standard-Farben
-
-```yaml
-colors:
-  pv: "#f39c12"        # Orange - typisch für Sonnenenergie
-  purchase: "#e74c3c"   # Rot - negative Kosten
-  discharge: "#27ae60"  # Grün - positive Energie
-  house: "#3498db"      # Blau - neutraler Verbrauch
-  car: "#9b59b6"        # Lila - spezieller Verbrauch
-  sale: "#e67e22"       # Orange-Rot - positive Einnahmen
-  charge: "#2ecc71"     # Hellgrün - positive Ladung
 ```
 
 ### 📊 Darstellung
@@ -177,138 +116,74 @@ Die Card zeigt eine intuitive Darstellung der Energiebilanz:
 ### 🎨 Theme-Unterstützung
 
 Die Card erkennt automatisch das Home Assistant Farbschema:
-
-#### **Light Mode:**
-- Weißer Hintergrund
-- Schwarze Nullinie und Texte
-- Graue Labels und Werte
-
-#### **Dark Mode:**
-- Dunkler Hintergrund
-- Weiße Nullinie und Texte
-- Hellgraue Labels und Werte
+- **Helles Theme** - helle Hintergründe und dunkle Texte
+- **Dunkles Theme** - dunkle Hintergründe und helle Texte
+- **Home Assistant Standard-Farben** - konsistente Darstellung
 
 ### 📱 Responsive Design
 
 Die Card passt sich automatisch an verschiedene Bildschirmgrößen an:
-
-- **Große Bildschirme:** Optimale Ausnutzung mit 95% der verfügbaren Höhe
-- **Kleine Bildschirme:** Intelligente Skalierung ohne Überläufe
-- **Mobile Geräte:** Perfekte Darstellung auf allen Auflösungen
+- **Desktop** - optimale Darstellung auf großen Bildschirmen
+- **Tablet** - angepasste Skalierung für mittlere Bildschirme
+- **Mobile** - kompakte Darstellung auf kleinen Bildschirmen
 
 ### 🔍 Troubleshooting
 
 #### Card wird nicht angezeigt
+1. Überprüfen Sie die Browser-Entwicklertools (F12) auf Fehler
+2. Stellen Sie sicher, dass die Datei korrekt in `/config/www/` liegt
+3. Überprüfen Sie die `configuration.yaml` Syntax
+4. Starten Sie Home Assistant neu
 
-1. **Entity-IDs überprüfen**:
-   ```yaml
-   # Testen Sie in Developer Tools
-   sensor.pv_generation
-   sensor.grid_purchase
-   # etc.
-   ```
+#### Fehlende Daten
+1. Überprüfen Sie, ob die Sensor-Entities existieren
+2. Stellen Sie sicher, dass die Entities gültige numerische Werte haben
+3. Überprüfen Sie die Entity-IDs in der Konfiguration
 
-2. **Browser-Cache leeren**:
-   - `Ctrl+F5` (Windows) oder `Cmd+Shift+R` (Mac)
+#### Darstellungsprobleme
+1. Löschen Sie den Browser-Cache
+2. Überprüfen Sie die Theme-Einstellungen
+3. Testen Sie mit der Standard-Konfiguration
 
-3. **Logs überprüfen**:
-   - Browser-Konsole für JavaScript-Fehler
+### 🧪 Testing
 
-#### Balken werden nicht angezeigt
-
-1. **Sensor-Werte prüfen**:
-   - Stellen Sie sicher, dass die Sensoren gültige numerische Werte haben
-   - Testen Sie: `{{ states('sensor.pv_generation') | float }}`
-
-2. **Einheiten überprüfen**:
-   - Alle Sensoren sollten in kWh sein
-   - Keine negativen Werte
-
-#### Theme wird nicht erkannt
-
-1. **Home Assistant Version**:
-   - Mindestens Version 2023.8.0 erforderlich
-   - Aktuellste Version empfohlen
-
-2. **CSS-Variablen**:
-   - Die Card verwendet Standard Home Assistant CSS-Variablen
-   - Funktioniert automatisch in allen HA-Installationen
-
-### 🧪 Testen
-
-Öffnen Sie `HA-Card-Test.html` in Ihrem Browser zum lokalen Testen:
-
-- **Theme-Umschalter** für Dark/Light Mode
-- **Dynamische Größenanpassung**
-- **Zufällige Daten-Generator**
-- **Vollständige Funktionalität**
+Testen Sie die Card lokal mit der Datei `HA-Card-Test.html`:
+1. Öffnen Sie `HA-Card-Test.html` in Ihrem Browser
+2. Testen Sie verschiedene Größen und Daten
+3. Überprüfen Sie die Console-Logs für Debug-Informationen
 
 ---
 
 ## 🇺🇸 English
 
-A modern, responsive custom card for Home Assistant to dynamically display the daily energy balance in your household.
+### 🚀 Installation
 
-### 🚀 Features
+#### Option 1: HACS (Recommended)
+1. Make sure [HACS](https://hacs.xyz/) is installed
+2. Add this repository to HACS
+3. Search for "Daily Energy Balance Card" in HACS
+4. Click "Download"
+5. Restart Home Assistant
 
-- **Dynamic bar charts** with automatically positioned baseline
-- **Responsive design** - automatically adapts to all window sizes
-- **Home Assistant theme detection** - automatic adaptation to light/dark scheme
-- **Intelligent scaling** - optimal space utilization without overflow
-- **Home Assistant standard colors** for intuitive color coding
-- **No legend or summary** - maximum space utilization for bars
-- **Smooth hover effects** for better user interaction
-
-### 📦 Installation
-
-#### Via HACS (Recommended)
-
-1. **Install HACS** (if not already done):
-   - Go to [HACS](https://hacs.xyz/) and follow the installation guide
-
-2. **Add custom repository**:
-   - Open HACS in Home Assistant
-   - Go to "Frontend" → "Custom Repositories"
-   - Add this repository
-
-3. **Install card**:
-   - Search for "Daily Energy Balance Card"
-   - Click "Download"
-   - Restart Home Assistant
-
-#### Manual Installation
-
-1. **Download file**:
-   - Download `daily-energy-balance-card.js`
-
-2. **Integrate into Home Assistant**:
-   - Copy the file to your Home Assistant `www/` folder
-   - Add the following to your `configuration.yaml`:
-
+#### Option 2: Manual Installation
+1. Download `daily-energy-balance-card.js`
+2. Copy the file to `/config/www/`
+3. Add to your `configuration.yaml`:
 ```yaml
 frontend:
   extra_module_url:
     - /local/daily-energy-balance-card.js
 ```
+4. Restart Home Assistant
 
-### ⚙️ Configuration
+### 📋 Configuration
 
-#### Basic Configuration
-
-```yaml
-type: custom:daily-energy-balance-card
-title: "Daily Energy Balance"
-# All entities are optional - default sensors are used automatically
-```
-
-#### Minimal Configuration (recommended)
-
+#### Minimal Configuration
 ```yaml
 type: custom:daily-energy-balance-card
 ```
 
-#### Complete Configuration
-
+#### Full Configuration
 ```yaml
 type: custom:daily-energy-balance-card
 title: "Daily Energy Balance"
@@ -328,19 +203,6 @@ labels:
   car: "Car"
   sale: "Sale"
   charge: "Battery"
-colors:
-  pv: "#f39c12"
-  purchase: "#e74c3c"
-  discharge: "#27ae60"
-  house: "#3498db"
-  car: "#9b59b6"
-  sale: "#e67e22"
-  charge: "#2ecc71"
-style: |
-  ha-card {
-    width: 100%;
-    height: 400px;
-  }
 ```
 
 ### 🔧 Configuration Options
@@ -350,11 +212,10 @@ style: |
 | `title` | string | "Daily Energy Balance" | Card title |
 | `entities` | object | Default sensors | Entity IDs for various energy sources |
 | `labels` | object | Default labels | Custom labels for the bars |
-| `colors` | object | Home Assistant Standard | Colors for the bars |
 
 ### Entity Configuration
 
-The card uses the following default sensors (all optional):
+The card uses the following sensors by default (all optional):
 
 - **`pv`**: `sensor.energy_solar` - Photovoltaic generation (kWh)
 - **`purchase`**: `sensor.energy_grid_in` - Grid purchase (kWh)
@@ -364,11 +225,11 @@ The card uses the following default sensors (all optional):
 - **`sale`**: `sensor.energy_grid_out` - Grid feed-in (kWh)
 - **`charge`**: `sensor.energy_battery_in` - Battery charging (kWh)
 
-**Note:** All entities are optional. If not specified, default sensors are used.
+**Note:** All entities are optional. If not specified, default sensors will be used.
 
 ### Label Configuration
 
-The labels can be customized:
+Labels can be customized:
 
 ```yaml
 labels:
@@ -381,22 +242,9 @@ labels:
   charge: "Battery In"
 ```
 
-### Home Assistant Standard Colors
-
-```yaml
-colors:
-  pv: "#f39c12"        # Orange - typical for solar energy
-  purchase: "#e74c3c"   # Red - negative costs
-  discharge: "#27ae60"  # Green - positive energy
-  house: "#3498db"      # Blue - neutral consumption
-  car: "#9b59b6"        # Purple - special consumption
-  sale: "#e67e22"       # Orange-red - positive income
-  charge: "#2ecc71"     # Light green - positive charging
-```
-
 ### 📊 Display
 
-The card shows an intuitive representation of the energy balance:
+The card shows an intuitive representation of energy balance:
 
 #### **Upper bars** (Energy sources):
 - **PV** (Orange) - Photovoltaic generation
@@ -405,110 +253,50 @@ The card shows an intuitive representation of the energy balance:
 
 #### **Lower bars** (Energy consumption):
 - **House** (Blue) - House consumption
-- **Sale** (Orange-red) - Grid sale
-- **Battery** (Light green) - Battery charge
+- **Sale** (Orange-red) - Grid feed-in
+- **Battery** (Light green) - Battery charging
 
-#### **Intelligent features:**
-- **Dynamic baseline** - automatically positions based on data
+#### **Smart Features:**
+- **Dynamic baseline** - automatically positioned based on data
 - **Responsive scaling** - adapts to all window sizes
-- **Optimal space utilization** - no overflow or excessive spacing
+- **Optimal space utilization** - no overflows or excessive spacing
 - **Theme detection** - automatic adaptation to light/dark scheme
 
 ### 🎨 Theme Support
 
 The card automatically detects the Home Assistant color scheme:
-
-#### **Light Mode:**
-- White background
-- Black baseline and texts
-- Gray labels and values
-
-#### **Dark Mode:**
-- Dark background
-- White baseline and texts
-- Light gray labels and values
+- **Light Theme** - light backgrounds and dark text
+- **Dark Theme** - dark backgrounds and light text
+- **Home Assistant Standard Colors** - consistent appearance
 
 ### 📱 Responsive Design
 
 The card automatically adapts to different screen sizes:
-
-- **Large screens:** Optimal utilization with 95% of available height
-- **Small screens:** Intelligent scaling without overflow
-- **Mobile devices:** Perfect display on all resolutions
+- **Desktop** - optimal display on large screens
+- **Tablet** - adapted scaling for medium screens
+- **Mobile** - compact display on small screens
 
 ### 🔍 Troubleshooting
 
 #### Card not displayed
+1. Check browser developer tools (F12) for errors
+2. Make sure the file is correctly in `/config/www/`
+3. Check the `configuration.yaml` syntax
+4. Restart Home Assistant
 
-1. **Check entity IDs**:
-   ```yaml
-   # Test in Developer Tools
-   sensor.pv_generation
-   sensor.grid_purchase
-   # etc.
-   ```
+#### Missing data
+1. Check if sensor entities exist
+2. Make sure entities have valid numeric values
+3. Check entity IDs in configuration
 
-2. **Clear browser cache**:
-   - `Ctrl+F5` (Windows) or `Cmd+Shift+R` (Mac)
-
-3. **Check logs**:
-   - Browser console for JavaScript errors
-
-#### Bars not displayed
-
-1. **Check sensor values**:
-   - Make sure sensors have valid numeric values
-   - Test: `{{ states('sensor.pv_generation') | float }}`
-
-2. **Check units**:
-   - All sensors should be in kWh
-   - No negative values
-
-#### Theme not detected
-
-1. **Home Assistant version**:
-   - Minimum version 2023.8.0 required
-   - Latest version recommended
-
-2. **CSS variables**:
-   - The card uses standard Home Assistant CSS variables
-   - Works automatically in all HA installations
+#### Display issues
+1. Clear browser cache
+2. Check theme settings
+3. Test with default configuration
 
 ### 🧪 Testing
 
-Open `HA-Card-Test.html` in your browser for local testing:
-
-- **Theme switcher** for Dark/Light mode
-- **Dynamic size adjustment**
-- **Random data generator**
-- **Full functionality**
-
----
-
-## 🤝 Contributing
-
-Verbesserungsvorschläge und Bug-Reports sind willkommen! Erstellen Sie einfach ein Issue oder einen Pull Request.
-
-Improvement suggestions and bug reports are welcome! Simply create an issue or pull request.
-
-## 📄 License
-
-Dieses Projekt steht unter der MIT-Lizenz.
-
-This project is licensed under the MIT License.
-
-## 🙏 Acknowledgments
-
-- Home Assistant Community für die großartige Plattform
-- HACS für die einfache Integration
-- Alle Mitwirkenden und Tester
-
-- Home Assistant Community for the great platform
-- HACS for the easy integration
-- All contributors and testers
-
----
-
-**Viel Spaß mit Ihrer Daily Energy Balance Card! ⚡**
-
-**Have fun with your Daily Energy Balance Card! ⚡** 
+Test the card locally with the file `HA-Card-Test.html`:
+1. Open `HA-Card-Test.html` in your browser
+2. Test different sizes and data
+3. Check console logs for debug information 

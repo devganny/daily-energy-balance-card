@@ -148,28 +148,28 @@
             wrapper.style.width = width + 'px';
             wrapper.style.height = height + 'px';
             
-            // Use renderEnergyCard function directly
+            // Render card with dynamic height
             wrapper.innerHTML = renderEnergyCard(cardConfig, mockHass, height);
             
             console.log('Card successfully initialized!');
         }
-
+        
         // Update data
         function updateData() {
             const wrapper = document.getElementById('card-wrapper');
-            const height = document.getElementById('height-input').value;
+            const height = wrapper.clientHeight;
             wrapper.innerHTML = renderEnergyCard(cardConfig, mockHass, height);
             console.log('Data updated');
         }
-
-        // Generate random data
+        
+        // Randomize data
         function randomizeData() {
             Object.keys(mockHass.states).forEach(key => {
                 mockHass.states[key].state = (Math.random() * 50).toFixed(1);
             });
             updateData();
         }
-
+        
         // Resize card
         function resizeCard() {
             const width = document.getElementById('width-input').value;
@@ -179,36 +179,31 @@
             wrapper.style.width = width + 'px';
             wrapper.style.height = height + 'px';
             
-            // Re-render card with new container height
+            // Re-render card with new height
             wrapper.innerHTML = renderEnergyCard(cardConfig, mockHass, height);
             
             console.log('Card size changed to:', width + 'x' + height);
         }
-
-        // Theme switcher
+        
+        // Toggle theme
         function toggleTheme() {
             const body = document.body;
-            const themeToggle = document.getElementById('theme-toggle');
+            const button = document.getElementById('theme-toggle');
             
-            if (body.classList.contains('dark-theme')) {
-                body.classList.remove('dark-theme');
-                body.classList.add('light-theme');
-                themeToggle.textContent = '☀️ Light Mode';
-            } else {
+            if (body.classList.contains('light-theme')) {
                 body.classList.remove('light-theme');
                 body.classList.add('dark-theme');
-                themeToggle.textContent = '🌙 Dark Mode';
+                button.textContent = '☀️ Light Mode';
+            } else {
+                body.classList.remove('dark-theme');
+                body.classList.add('light-theme');
+                button.textContent = '🌙 Dark Mode';
             }
-            
-            // Re-render card to apply theme changes
-            updateData();
         }
-
-        // Initialize when page loads
+        
+        // Initialize on page load
         window.addEventListener('load', function() {
             console.log('Page loaded');
-            // Default to dark theme
-            document.body.classList.add('dark-theme');
             initCard();
         });
     </script>
