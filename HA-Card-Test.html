@@ -93,7 +93,7 @@
     <script src="daily-energy-balance-card.js"></script>
 
     <script>
-        // Mock Home Assistant Objekt
+        // Mock Home Assistant object
         const mockHass = {
             states: {
                 'sensor.energy_solar': { state: '25.9' },
@@ -106,7 +106,7 @@
             }
         };
 
-        // Card-Konfiguration
+        // Card configuration
         const cardConfig = {
             title: 'Daily Energy Balance',
             entities: {
@@ -120,49 +120,49 @@
             },
             labels: {
                 pv: 'PV',
-                purchase: 'Kauf',
-                discharge: 'Batterie',
-                house: 'Haus',
-                car: 'Auto',
-                sale: 'Verkauf',
-                charge: 'Batterie'
+                purchase: 'Purchase',
+                discharge: 'Battery',
+                house: 'House',
+                car: 'Car',
+                sale: 'Sale',
+                charge: 'Battery'
             },
             colors: {
-                pv: '#f39c12',        // Orange für PV
-                purchase: '#e74c3c',   // Rot für Netzbezug
-                discharge: '#27ae60',  // Grün für Batterie-Entladung
-                house: '#3498db',      // Blau für Hausverbrauch
-                car: '#9b59b6',        // Lila für Auto
-                sale: '#e67e22',       // Orange-Rot für Netzeinspeisung
-                charge: '#2ecc71'      // Hellgrün für Batterie-Ladung
+                pv: '#f39c12',        // Orange for PV
+                purchase: '#e74c3c',   // Red for grid purchase
+                discharge: '#27ae60',  // Green for battery discharge
+                house: '#3498db',      // Blue for house consumption
+                car: '#9b59b6',        // Purple for car
+                sale: '#e67e22',       // Orange-red for grid sale
+                charge: '#2ecc71'      // Light green for battery charge
             }
         };
 
-        // Card initialisieren
+        // Initialize card
         function initCard() {
             const wrapper = document.getElementById('card-wrapper');
             
-            // Initiale Größe setzen
+            // Set initial size
             const width = document.getElementById('width-input').value;
             const height = document.getElementById('height-input').value;
             wrapper.style.width = width + 'px';
             wrapper.style.height = height + 'px';
             
-            // Direkt die renderEnergyCard Funktion verwenden
+            // Use renderEnergyCard function directly
             wrapper.innerHTML = renderEnergyCard(cardConfig, mockHass, height);
             
-            console.log('Card erfolgreich initialisiert!');
+            console.log('Card successfully initialized!');
         }
 
-        // Daten aktualisieren
+        // Update data
         function updateData() {
             const wrapper = document.getElementById('card-wrapper');
             const height = document.getElementById('height-input').value;
             wrapper.innerHTML = renderEnergyCard(cardConfig, mockHass, height);
-            console.log('Daten aktualisiert');
+            console.log('Data updated');
         }
 
-        // Zufällige Daten generieren
+        // Generate random data
         function randomizeData() {
             Object.keys(mockHass.states).forEach(key => {
                 mockHass.states[key].state = (Math.random() * 50).toFixed(1);
@@ -170,7 +170,7 @@
             updateData();
         }
 
-        // Card-Größe ändern
+        // Resize card
         function resizeCard() {
             const width = document.getElementById('width-input').value;
             const height = document.getElementById('height-input').value;
@@ -179,13 +179,13 @@
             wrapper.style.width = width + 'px';
             wrapper.style.height = height + 'px';
             
-            // Card mit neuer Container-Höhe neu rendern
+            // Re-render card with new container height
             wrapper.innerHTML = renderEnergyCard(cardConfig, mockHass, height);
             
-            console.log('Card-Größe geändert auf:', width + 'x' + height);
+            console.log('Card size changed to:', width + 'x' + height);
         }
 
-        // Theme-Umschalter
+        // Theme switcher
         function toggleTheme() {
             const body = document.body;
             const themeToggle = document.getElementById('theme-toggle');
@@ -200,14 +200,14 @@
                 themeToggle.textContent = '🌙 Dark Mode';
             }
             
-            // Card neu rendern um Theme-Änderungen zu übernehmen
+            // Re-render card to apply theme changes
             updateData();
         }
 
-        // Initialisierung beim Laden der Seite
+        // Initialize when page loads
         window.addEventListener('load', function() {
-            console.log('Seite geladen');
-            // Standardmäßig Dark Theme
+            console.log('Page loaded');
+            // Default to dark theme
             document.body.classList.add('dark-theme');
             initCard();
         });

@@ -1,4 +1,5 @@
 # Daily Energy Balance Card für Home Assistant
+# Daily Energy Balance Card for Home Assistant
 
 [🇩🇪 Deutsch](#deutsch) | [🇺🇸 English](#english)
 
@@ -75,12 +76,12 @@ entities:
   charge: sensor.energy_battery_in
 labels:
   pv: "PV"
-  purchase: "Kauf"
-  discharge: "Batterie"
-  house: "Haus"
-  car: "Auto"
-  sale: "Verkauf"
-  charge: "Batterie"
+  purchase: "Purchase"
+  discharge: "Battery"
+  house: "House"
+  car: "Car"
+  sale: "Sale"
+  charge: "Battery"
 colors:
   pv: "#f39c12"
   purchase: "#e74c3c"
@@ -109,13 +110,13 @@ style: |
 
 Die Card verwendet standardmäßig folgende Sensoren (alle optional):
 
-- **`pv`**: `sensor.energy_solar` - Photovoltaik-Erzeugung (kWh)
-- **`purchase`**: `sensor.energy_grid_in` - Netzbezug (kWh)
-- **`discharge`**: `sensor.energy_battery_out` - Batterie-Entladung (kWh)
-- **`house`**: `sensor.energy_consumption_daily` - Hausverbrauch (kWh)
-- **`car`**: `sensor.car_consumption` - Auto-Verbrauch (kWh, optional)
-- **`sale`**: `sensor.energy_grid_out` - Netzeinspeisung (kWh)
-- **`charge`**: `sensor.energy_battery_in` - Batterie-Ladung (kWh)
+- **`pv`**: `sensor.energy_solar` - Photovoltaic generation (kWh)
+- **`purchase`**: `sensor.energy_grid_in` - Grid purchase (kWh)
+- **`discharge`**: `sensor.energy_battery_out` - Battery discharge (kWh)
+- **`house`**: `sensor.energy_consumption_daily` - House consumption (kWh)
+- **`car`**: `sensor.car_consumption` - Car consumption (kWh, optional)
+- **`sale`**: `sensor.energy_grid_out` - Grid feed-in (kWh)
+- **`charge`**: `sensor.energy_battery_in` - Battery charging (kWh)
 
 **Hinweis:** Alle Entities sind optional. Falls nicht angegeben, werden die Standard-Sensoren verwendet.
 
@@ -151,15 +152,15 @@ colors:
 
 Die Card zeigt eine intuitive Darstellung der Energiebilanz:
 
-#### **Obere Balken** (Energiequellen):
-- **PV** (Orange) - Photovoltaik-Erzeugung
-- **Kauf** (Rot) - Netzbezug
-- **Batterie** (Grün) - Batterie-Entladung
+#### **Upper bars** (Energy sources):
+- **PV** (Orange) - Photovoltaic generation
+- **Purchase** (Red) - Grid purchase
+- **Battery** (Green) - Battery discharge
 
-#### **Untere Balken** (Energieverbrauch):
-- **Haus** (Blau) - Hausverbrauch
-- **Verkauf** (Orange-Rot) - Netzeinspeisung
-- **Batterie** (Hellgrün) - Batterie-Ladung
+#### **Lower bars** (Energy consumption):
+- **House** (Blue) - House consumption
+- **Sale** (Orange-red) - Grid feed-in
+- **Battery** (Light green) - Battery charging
 
 #### **Intelligente Features:**
 - **Dynamische Nullinie** - positioniert sich automatisch basierend auf den Daten
@@ -348,8 +349,8 @@ The card uses the following default sensors (all optional):
 - **`discharge`**: `sensor.energy_battery_out` - Battery discharge (kWh)
 - **`house`**: `sensor.energy_consumption_daily` - House consumption (kWh)
 - **`car`**: `sensor.car_consumption` - Car consumption (kWh, optional)
-- **`sale`**: `sensor.energy_grid_out` - Grid sale (kWh)
-- **`charge`**: `sensor.energy_battery_in` - Battery charge (kWh)
+- **`sale`**: `sensor.energy_grid_out` - Grid feed-in (kWh)
+- **`charge`**: `sensor.energy_battery_in` - Battery charging (kWh)
 
 **Note:** All entities are optional. If not specified, default sensors are used.
 
