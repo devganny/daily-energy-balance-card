@@ -12,6 +12,8 @@ class DailyEnergyBalanceCard extends HTMLElement {
     this.config = {
       title: 'Energiebilanz',
       show_title: true,
+      box_height: 300,
+      box_width: 182,
       ...config
     };
 
@@ -37,9 +39,6 @@ class DailyEnergyBalanceCard extends HTMLElement {
           box-shadow: var(--ha-card-box-shadow, none);
           overflow: hidden;
           position: relative;
-          height: 100%;
-          display: flex;
-          flex-direction: column;
         }
         
         .card-header {
@@ -47,7 +46,6 @@ class DailyEnergyBalanceCard extends HTMLElement {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          flex-shrink: 0;
         }
         
         .card-title {
@@ -59,11 +57,9 @@ class DailyEnergyBalanceCard extends HTMLElement {
         
         .card-content {
           padding: 16px;
-          flex: 1;
           display: flex;
           justify-content: center;
           align-items: center;
-          min-height: 0;
         }
         
         .energy-chart {
@@ -77,15 +73,6 @@ class DailyEnergyBalanceCard extends HTMLElement {
         .chart-container {
           position: relative;
           display: inline-block;
-          width: 100%;
-          height: 100%;
-        }
-        
-        .chart-container svg {
-          width: 100%;
-          height: 100%;
-          max-width: 100%;
-          max-height: 100%;
         }
         
         .loading {
@@ -160,6 +147,7 @@ class DailyEnergyBalanceCard extends HTMLElement {
     const wirkLeistungHaus = wirkLeistungVerbrauch - wirkLeistungAuto;
     const wirkLeistungNetzOut = getValue(entities.grid_export);
     const wirkLeistungBatterieIn = getValue(entities.battery_charge);
+    const skinMode = getValue(entities.skin_mode);
 
     return {
       wirkLeistungAuto,
@@ -169,40 +157,9 @@ class DailyEnergyBalanceCard extends HTMLElement {
       wirkLeistungVerbrauch,
       wirkLeistungHaus,
       wirkLeistungNetzOut,
-      wirkLeistungBatterieIn
+      wirkLeistungBatterieIn,
+      skinMode
     };
-  }
-
-  // Automatische Dark/Light Mode Erkennung
-  isDarkMode() {
-    // Prüfe verschiedene Möglichkeiten für Dark Mode
-    const card = this.shadowRoot.querySelector('.card');
-    if (!card) return false;
-    
-    const computedStyle = window.getComputedStyle(card);
-    const backgroundColor = computedStyle.backgroundColor;
-    
-    // Prüfe ob der Hintergrund dunkel ist
-    if (backgroundColor) {
-      const rgb = backgroundColor.match(/\d+/g);
-      if (rgb && rgb.length >= 3) {
-        const r = parseInt(rgb[0]);
-        const g = parseInt(rgb[1]);
-        const b = parseInt(rgb[2]);
-        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-        return brightness < 128;
-      }
-    }
-    
-    // Fallback: Prüfe CSS-Variablen
-    const primaryTextColor = getComputedStyle(document.documentElement)
-      .getPropertyValue('--primary-text-color');
-    
-    if (primaryTextColor) {
-      return primaryTextColor.includes('255') || primaryTextColor.includes('fff');
-    }
-    
-    return false;
   }
 
   generateSVG(values) {
@@ -214,7 +171,8 @@ class DailyEnergyBalanceCard extends HTMLElement {
       wirkLeistungVerbrauch,
       wirkLeistungHaus,
       wirkLeistungNetzOut,
-      wirkLeistungBatterieIn
+      wirkLeistungBatterieIn,
+      skinMode
     } = values;
 
     // Dashboard-Farbschema basierend auf dem bestehenden Design
@@ -226,38 +184,18 @@ class DailyEnergyBalanceCard extends HTMLElement {
       verbrauchHaus: "#E0E0E0"       // Hellgrau für Haus-Verbrauch
     };
 
-    // Automatische Dark/Light Mode Erkennung
-    const isDark = this.isDarkMode();
-    const skinColor = isDark ? '#ffffff' : '#333333';
-
-    // Dynamische Größenanpassung
-    const container = this.shadowRoot.querySelector('.chart-container');
-    let boxBreite = 182;
-    let boxHoehe = 300;
-    
-    if (container) {
-      const rect = container.getBoundingClientRect();
-      if (rect.width > 0 && rect.height > 0) {
-        // Verwende verfügbaren Platz, aber behalte Proportionen bei
-        const aspectRatio = 182 / 300;
-        const maxWidth = rect.width - 32; // Padding abziehen
-        const maxHeight = rect.height - 32;
-        
-        if (maxWidth / aspectRatio <= maxHeight) {
-          boxBreite = maxWidth;
-          boxHoehe = maxWidth / aspectRatio;
-        } else {
-          boxHoehe = maxHeight;
-          boxBreite = maxHeight * aspectRatio;
-        }
-        
-        // Mindestgröße sicherstellen
-        boxBreite = Math.max(boxBreite, 150);
-        boxHoehe = Math.max(boxHoehe, 250);
-      }
+    // Skin-Einstellungen mit Homematic-Farbschema
+    let skinColor = '#333333'; // Light mode default
+    if (skinMode === 1) {
+      skinColor = '#ffffff'; // Dark mode
+    } else if (skinMode === 2) {
+      skinColor = '#333333'; // Light mode
     }
 
-    const offsetRand = Math.floor(boxHoehe * 0.11); // 33/300 als Verhältnis
+    // Dimensionen
+    const boxHoehe = this.config.box_height;
+    const boxBreite = this.config.box_width;
+    const offsetRand = 33;
     const balkenBreite = Math.floor((boxBreite - 40) / 3);
 
     // Max-Werte ermitteln
@@ -267,7 +205,7 @@ class DailyEnergyBalanceCard extends HTMLElement {
     const positionNullLinie = Math.floor(offsetRand + (maxWertBezug * pixelProKWh));
 
     // SVG generieren
-    let svg = `<svg width="100%" height="100%" viewBox="0 0 ${boxBreite} ${boxHoehe}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" preserveAspectRatio="xMidYMid meet">`;
+    let svg = `<svg width="${boxBreite}px" height="${boxHoehe}px" viewBox="0 0 ${boxBreite} ${boxHoehe}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">`;
 
     // Null-Linie
     const breiteNullLinie = boxBreite - 9;
@@ -374,16 +312,19 @@ class DailyEnergyBalanceCard extends HTMLElement {
   static getStubConfig() {
     return {
       entities: {
-        pv_power: 'sensor.power_solar',
-        grid_import: 'sensor.power_grid_in',
-        grid_export: 'sensor.power_grid_out',
-        battery_charge: 'sensor.power_battery_in',
-        battery_discharge: 'sensor.power_battery_out',
-        consumption: 'sensor.power_consumption',
-        auto_consumption: 'sensor.power_solar_used_by_wallbox'
+        pv_power: 'sensor.pv_power',
+        grid_import: 'sensor.grid_import',
+        grid_export: 'sensor.grid_export',
+        battery_charge: 'sensor.battery_charge',
+        battery_discharge: 'sensor.battery_discharge',
+        consumption: 'sensor.consumption',
+        auto_consumption: 'sensor.auto_consumption',
+        skin_mode: 'sensor.skin_mode'
       },
       title: 'Energiebilanz',
-      show_title: true
+      show_title: true,
+      box_height: 300,
+      box_width: 182
     };
   }
 }

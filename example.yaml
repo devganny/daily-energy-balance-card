@@ -4,25 +4,23 @@
 type: custom:daily-energy-balance-card
 entities:
   # PV-Anlage
-  pv_power: sensor.solar_power
+  pv_power: sensor.power_solar
   
   # Netzbezug und -einspeisung
-  grid_import: sensor.grid_import_power
-  grid_export: sensor.grid_export_power
+  grid_import: sensor.power_grid_in
+  grid_export: sensor.power_grid_out
   
   # Batteriespeicher
-  battery_charge: sensor.battery_charge_power
-  battery_discharge: sensor.battery_discharge_power
+  battery_charge: sensor.power_battery_in
+  battery_discharge: sensor.power_battery_out
   
   # Verbrauch
-  consumption: sensor.total_consumption
-  auto_consumption: sensor.ev_charging_power
-  
-  # Skin-Modus (optional)
-  skin_mode: sensor.theme_mode
+  consumption: sensor.power_consumption
+  auto_consumption: sensor.power_solar_used_by_wallbox
 
 # Karten-Einstellungen
 title: "Tägliche Energiebilanz"
 show_title: true
-box_height: 350
-box_width: 200
+
+# Hinweis: Die Karte passt sich automatisch an die Dashboard-Größe an
+# und erkennt automatisch den Dark/Light Mode
