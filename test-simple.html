@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Energy Balance Card - Einfacher Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        body.dark-mode {
+            background-color: #111111;
+            color: #ffffff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        body.dark-mode .test-section {
+            background: #222222;
+            color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .test-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .control-group label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .control-group input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .control-group select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .card-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .card-wrapper {
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+            padding: 20px;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        body.dark-mode .card-wrapper {
+            background: #222222;
+            border-color: #444;
+        }
+        
+        .status {
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        h1, h2 {
+            color: #333;
+            transition: color 0.3s ease;
+        }
+        
+        body.dark-mode h1, body.dark-mode h2 {
+            color: #ffffff;
+        }
+        
+        .preset-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .preset-btn {
+            padding: 8px 16px;
+            background-color: #e9ecef;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .preset-btn:hover {
+            background-color: #dee2e6;
+        }
+        
+        .preset-btn.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        .energy-chart {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .chart-container {
+            position: relative;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Daily Energy Balance Card - Einfacher Test</h1>
+        
+        <div class="test-section">
+            <h2>Test-Konfiguration</h2>
+            
+            <div class="preset-buttons">
+                <button class="preset-btn active" onclick="loadPreset('normal')">Normaler Betrieb</button>
+                <button class="preset-btn" onclick="loadPreset('pv_only')">Nur PV</button>
+                <button class="preset-btn" onclick="loadPreset('battery_only')">Nur Batterie</button>
+                <button class="preset-btn" onclick="loadPreset('grid_only')">Nur Netz</button>
+                <button class="preset-btn" onclick="loadPreset('high_consumption')">Hoher Verbrauch</button>
+                <button class="preset-btn" onclick="loadPreset('zero')">Alle Werte 0</button>
+            </div>
+            
+            <div class="test-controls">
+                <div class="control-group">
+                    <label for="pv_power">PV-Leistung (kW):</label>
+                    <input type="number" id="pv_power" value="5.2" step="0.1" min="0">
+                </div>
+                
+                <div class="control-group">
+                    <label for="grid_import">Netzbezug (kW):</label>
+                    <input type="number" id="grid_import" value="1.8" step="0.1" min="0">
+                </div>
+                
+                <div class="control-group">
+                    <label for="grid_export">Netzeinspeisung (kW):</label>
+                    <input type="number" id="grid_export" value="0.0" step="0.1" min="0">
+                </div>
+                
+                <div class="control-group">
+                    <label for="battery_charge">Batterie-Ladung (kW):</label>
+                    <input type="number" id="battery_charge" value="2.1" step="0.1" min="0">
+                </div>
+                
+                <div class="control-group">
+                    <label for="battery_discharge">Batterie-Entladung (kW):</label>
+                    <input type="number" id="battery_discharge" value="0.0" step="0.1" min="0">
+                </div>
+                
+                <div class="control-group">
+                    <label for="consumption">Gesamtverbrauch (kW):</label>
+                    <input type="number" id="consumption" value="4.5" step="0.1" min="0">
+                </div>
+                
+                <div class="control-group">
+                    <label for="auto_consumption">Auto-Verbrauch (kW):</label>
+                    <input type="number" id="auto_consumption" value="1.2" step="0.1" min="0">
+                </div>
+                
+                <div class="control-group">
+                    <label for="skin_mode">Skin-Modus:</label>
+                    <select id="skin_mode">
+                        <option value="0">Auto</option>
+                        <option value="1">Dark</option>
+                        <option value="2">Light</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="box_height">Kartenhöhe (px):</label>
+                    <input type="number" id="box_height" value="300" min="200" max="500">
+                </div>
+                
+                <div class="control-group">
+                    <label for="box_width">Kartenbreite (px):</label>
+                    <input type="number" id="box_width" value="182" min="150" max="300">
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn-primary" onclick="updateChart()">Karte aktualisieren</button>
+                <button class="btn-secondary" onclick="resetValues()">Werte zurücksetzen</button>
+                <button class="btn-success" onclick="toggleDarkMode()">Dark Mode</button>
+            </div>
+            
+            <div id="status" class="status info">
+                Karte bereit. Klicken Sie auf "Karte aktualisieren" um die Änderungen zu sehen.
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Karten-Vorschau</h2>
+            <div class="card-container">
+                <div class="card-wrapper">
+                    <div class="energy-chart">
+                        <div class="chart-container" id="chart-container">
+                            <div>Lade Daten...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>HomeAssistant Konfiguration</h2>
+            <p>Kopieren Sie diese Konfiguration in Ihr HomeAssistant Dashboard:</p>
+            <pre id="config-output" style="background: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto;"></pre>
+        </div>
+    </div>
+
+    <script>
+        // Preset-Daten
+        const presets = {
+            normal: {
+                pv_power: 5.2,
+                grid_import: 1.8,
+                grid_export: 0.0,
+                battery_charge: 2.1,
+                battery_discharge: 0.0,
+                consumption: 4.5,
+                auto_consumption: 1.2,
+                skin_mode: 0
+            },
+            pv_only: {
+                pv_power: 8.5,
+                grid_import: 0.0,
+                grid_export: 3.2,
+                battery_charge: 2.1,
+                battery_discharge: 0.0,
+                consumption: 3.2,
+                auto_consumption: 0.0,
+                skin_mode: 0
+            },
+            battery_only: {
+                pv_power: 0.0,
+                grid_import: 4.2,
+                grid_export: 0.0,
+                battery_charge: 0.0,
+                battery_discharge: 2.8,
+                consumption: 7.0,
+                auto_consumption: 2.5,
+                skin_mode: 0
+            },
+            grid_only: {
+                pv_power: 0.0,
+                grid_import: 6.8,
+                grid_export: 0.0,
+                battery_charge: 0.0,
+                battery_discharge: 0.0,
+                consumption: 6.8,
+                auto_consumption: 1.8,
+                skin_mode: 0
+            },
+            high_consumption: {
+                pv_power: 3.2,
+                grid_import: 8.5,
+                grid_export: 0.0,
+                battery_charge: 0.0,
+                battery_discharge: 4.2,
+                consumption: 15.9,
+                auto_consumption: 5.5,
+                skin_mode: 0
+            },
+            zero: {
+                pv_power: 0.0,
+                grid_import: 0.0,
+                grid_export: 0.0,
+                battery_charge: 0.0,
+                battery_discharge: 0.0,
+                consumption: 0.0,
+                auto_consumption: 0.0,
+                skin_mode: 0
+            }
+        };
+        
+        // Preset laden
+        function loadPreset(presetName) {
+            const preset = presets[presetName];
+            if (!preset) return;
+            
+            // Preset-Buttons aktualisieren
+            document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Werte setzen
+            Object.keys(preset).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = preset[key];
+                }
+            });
+            
+            updateChart();
+            showStatus(`Preset "${presetName}" geladen`, 'success');
+        }
+        
+        // Werte aus Formular holen
+        function getValues() {
+            return {
+                wirkLeistungAuto: parseFloat(document.getElementById('auto_consumption').value) || 0,
+                wirkLeistungPV: parseFloat(document.getElementById('pv_power').value) || 0,
+                wirkLeistungNetzIn: parseFloat(document.getElementById('grid_import').value) || 0,
+                wirkLeistungBatterieOut: parseFloat(document.getElementById('battery_discharge').value) || 0,
+                wirkLeistungVerbrauch: parseFloat(document.getElementById('consumption').value) || 0,
+                wirkLeistungNetzOut: parseFloat(document.getElementById('grid_export').value) || 0,
+                wirkLeistungBatterieIn: parseFloat(document.getElementById('battery_charge').value) || 0,
+                skinMode: parseInt(document.getElementById('skin_mode').value) || 0
+            };
+        }
+        
+        // SVG generieren
+        function generateSVG(values) {
+            const {
+                wirkLeistungAuto,
+                wirkLeistungPV,
+                wirkLeistungNetzIn,
+                wirkLeistungBatterieOut,
+                wirkLeistungVerbrauch,
+                wirkLeistungNetzOut,
+                wirkLeistungBatterieIn,
+                skinMode
+            } = values;
+
+            // Berechnungen
+            const wirkLeistungHaus = wirkLeistungVerbrauch - wirkLeistungAuto;
+
+            // Dashboard-Farbschema basierend auf dem bestehenden Design
+            const colors = {
+                verbrauchAuto: "#BABABA",      // Grau für Auto-Verbrauch
+                pv: "#FF8C00",                 // Orange für PV (wie im Dashboard)
+                netz: "#4682B4",               // Dunkleres Blau für Netz
+                batterie: "#32CD32",           // Grün für Batterie (wie CO₂-neutral Blatt)
+                verbrauchHaus: "#E0E0E0"       // Hellgrau für Haus-Verbrauch
+            };
+
+            // Skin-Einstellungen mit Homematic-Farbschema
+            let skinColor = '#333333'; // Light mode default
+            if (skinMode === 1 || document.body.classList.contains('dark-mode')) {
+                skinColor = '#ffffff'; // Dark mode
+            } else if (skinMode === 2) {
+                skinColor = '#333333'; // Light mode
+            }
+
+            // Dimensionen
+            const boxHoehe = parseInt(document.getElementById('box_height').value) || 300;
+            const boxBreite = parseInt(document.getElementById('box_width').value) || 182;
+            const offsetRand = 33;
+            const balkenBreite = Math.floor((boxBreite - 40) / 3);
+
+            // Max-Werte ermitteln
+            const maxWertBezug = Math.max(wirkLeistungPV, wirkLeistungNetzIn, wirkLeistungBatterieOut);
+            const maxWertVerbrauch = Math.max(wirkLeistungVerbrauch, wirkLeistungNetzOut, wirkLeistungBatterieIn);
+            const pixelProKWh = (boxHoehe - (2 * offsetRand)) / Math.max(maxWertBezug + maxWertVerbrauch, 1);
+            const positionNullLinie = Math.floor(offsetRand + (maxWertBezug * pixelProKWh));
+
+            // SVG generieren
+            let svg = `<svg width="${boxBreite}px" height="${boxHoehe}px" viewBox="0 0 ${boxBreite} ${boxHoehe}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">`;
+
+            // Null-Linie
+            const breiteNullLinie = boxBreite - 9;
+            svg += `<rect x="4" y="${positionNullLinie}" width="${breiteNullLinie}" height="1" stroke="${skinColor}" fill="${skinColor}" stroke-width="1"/>`;
+
+            // PV Balken
+            const xOffsetPV = wirkLeistungPV >= 10 ? 0 : 5;
+            const balkenHoehePV = Math.floor(wirkLeistungPV * pixelProKWh);
+            const positionPVx = 5;
+            const positionPVy = positionNullLinie - balkenHoehePV - 5;
+            const positionPVLabelY = positionPVy - 18;
+            const positionPVLabelX = Math.floor(positionPVx + (balkenBreite / 2) - 10);
+            const positionPVWertY = positionPVy - 30;
+            const positionPVWertX = Math.floor(positionPVx + (balkenBreite / 2) - 14 + xOffsetPV);
+
+            svg += `<rect x="${positionPVx}" y="${positionPVy}" width="${balkenBreite}" height="${balkenHoehePV}" stroke="${colors.pv}" fill="${colors.pv}" stroke-width="3"/>
+                   <text transform="matrix(1.0 0.0 0.0 1.0 ${positionPVLabelX}.0 ${positionPVLabelY}.0)" y="12.0" font-size="12" font-family="Helvetica-Bold, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">PV</text>
+                   <text transform="matrix(1.0 0.0 0.0 1.0 ${positionPVWertX}.0 ${positionPVWertY}.0)" y="12.0" font-size="12" font-family="Helvetica, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">${wirkLeistungPV}</text>`;
+
+            // Netz in
+            const xOffsetNetzIn = wirkLeistungNetzIn >= 10 ? 0 : 5;
+            const positionNetzInX = 20 + balkenBreite;
+            const balkenHoeheNetzIn = Math.floor(wirkLeistungNetzIn * pixelProKWh);
+            const positionNetzInY = positionNullLinie - balkenHoeheNetzIn - 5;
+            const positionNetzInLabelY = positionNetzInY - 18;
+            const positionNetzInLabelX = Math.floor(positionNetzInX + (balkenBreite / 2) - 15);
+            const positionNetzInWertY = positionNetzInY - 30;
+            const positionNetzInWertX = Math.floor(positionNetzInX + (balkenBreite / 2) - 16 + xOffsetNetzIn);
+
+            svg += `<rect x="${positionNetzInX}" y="${positionNetzInY}" width="${balkenBreite}" height="${balkenHoeheNetzIn}" stroke="${colors.netz}" fill="${colors.netz}" stroke-width="3"/>
+                   <text transform="matrix(1.0 0.0 0.0 1.0 ${positionNetzInLabelX}.0 ${positionNetzInLabelY}.0)" y="12.0" font-size="12" font-family="Helvetica-Bold, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">Kauf</text>
+                   <text transform="matrix(1.0 0.0 0.0 1.0 ${positionNetzInWertX}.0 ${positionNetzInWertY}.0)" y="12.0" font-size="12" font-family="Helvetica, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">${wirkLeistungNetzIn}</text>`;
+
+            // Batterie out
+            const xOffsetBatterieOut = wirkLeistungBatterieOut >= 10 ? 0 : 5;
+            const positionBatterieOutX = 35 + (2 * balkenBreite);
+            const balkenHoeheBatterieOut = Math.floor(wirkLeistungBatterieOut * pixelProKWh);
+            const positionBatterieOutY = positionNullLinie - balkenHoeheBatterieOut - 5;
+            const positionBatterieOutLabelY = positionBatterieOutY - 18;
+            const positionBatterieOutLabelX = Math.floor(positionBatterieOutX + (balkenBreite / 2) - 26);
+            const positionBatterieOutWertY = positionBatterieOutY - 30;
+            const positionBatterieOutWertX = Math.floor(positionBatterieOutX + (balkenBreite / 2) - 14 + xOffsetBatterieOut);
+
+            svg += `<rect x="${positionBatterieOutX}" y="${positionBatterieOutY}" width="${balkenBreite}" height="${balkenHoeheBatterieOut}" stroke="${colors.batterie}" fill="${colors.batterie}" stroke-width="3"/>
+                   <text transform="matrix(1.0 0.0 0.0 1.0 ${positionBatterieOutLabelX}.0 ${positionBatterieOutLabelY}.0)" y="12.0" font-size="12" font-family="Helvetica-Bold, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">Entladen</text>
+                   <text transform="matrix(1.0 0.0 0.0 1.0 ${positionBatterieOutWertX}.0 ${positionBatterieOutWertY}.0)" y="12.0" font-size="12" font-family="Helvetica, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">${wirkLeistungBatterieOut}</text>`;
+
+            // Verbrauch Haus Balken
+            const positionVerbrauchHausY = positionNullLinie + 6;
+            const positionVerbrauchHausX = 5;
+            const balkenHoeheVerbrauchHaus = Math.floor(wirkLeistungHaus * pixelProKWh);
+            const positionVerbrauchHausWertY = positionVerbrauchHausY + balkenHoeheVerbrauchHaus + 15;
+            const positionVerbrauchHausWertX = Math.floor(positionVerbrauchHausX + (balkenBreite / 2) - 26);
+
+            svg += `<rect x="${positionVerbrauchHausX}" y="${positionVerbrauchHausY}" width="${balkenBreite}" height="${balkenHoeheVerbrauchHaus}" stroke="${colors.verbrauchHaus}" fill="${colors.verbrauchHaus}" stroke-width="3"/>`;
+
+            // Verbrauch Auto Balken
+            const positionVerbrauchAutoY = positionVerbrauchHausY + balkenHoeheVerbrauchHaus;
+            const positionVerbrauchAutoX = 5;
+            const balkenHoeheVerbrauchAuto = Math.floor(wirkLeistungAuto * pixelProKWh);
+            const positionVerbrauchAutoLabelY = positionVerbrauchAutoY + balkenHoeheVerbrauchAuto + 3;
+            const positionVerbrauchHausLabelX = Math.floor(positionVerbrauchAutoX + (balkenBreite / 2) - 29);
+            const positionVerbrauchAutoLabelX = positionVerbrauchHausLabelX + 31;
+            const positionVerbrauchAutoWertY = positionVerbrauchAutoY + balkenHoeheVerbrauchAuto + 15;
+            const positionVerbrauchAutoWertX = Math.floor(positionVerbrauchAutoX + (balkenBreite / 2) - 26);
+
+            svg += `<rect x="${positionVerbrauchAutoX}" y="${positionVerbrauchAutoY}" width="${balkenBreite}" height="${balkenHoeheVerbrauchAuto}" stroke="${colors.verbrauchAuto}" fill="${colors.verbrauchAuto}" stroke-width="3"/>
+                   <text transform="matrix(1.0 0.0 0.0 1.0 ${positionVerbrauchHausLabelX}.0 ${positionVerbrauchAutoLabelY}.0)" y="12.0" font-size="12" font-family="Helvetica-Bold, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">Haus/</text>
+                   <text transform="matrix(1.0 0.0 0.0 1.0 ${positionVerbrauchAutoLabelX}.0 ${positionVerbrauchAutoLabelY}.0)" y="12.0" font-size="12" font-family="Helvetica-Bold, Helvetica" fill="${colors.verbrauchAuto}" text-decoration="none" x="1.65283203125">Auto</text>
+                   <text transform="matrix(1.0 0.0 0.0 1.0 ${positionVerbrauchAutoWertX}.0 ${positionVerbrauchAutoWertY}.0)" y="12.0" font-size="12" font-family="Helvetica, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">${wirkLeistungHaus} / ${wirkLeistungAuto}</text>`;
+
+            // Netz out
+            const xOffsetNetzOut = wirkLeistungNetzOut >= 10 ? 0 : 5;
+            const positionNetzOutY = positionNullLinie + 6;
+            const positionNetzOutX = 20 + balkenBreite;
+            const balkenHoeheNetzOut = Math.floor(wirkLeistungNetzOut * pixelProKWh);
+            const positionNetzOutLabelY = positionNetzOutY + balkenHoeheNetzOut + 3;
+            const positionNetzOutLabelX = Math.floor(positionNetzOutX + (balkenBreite / 2) - 23);
+            const positionNetzOutWertY = positionNetzOutY + balkenHoeheNetzOut + 15;
+            const positionNetzOutWertX = Math.floor(positionNetzInX + (balkenBreite / 2) - 14 + xOffsetNetzOut);
+
+            svg += `<rect x="${positionNetzOutX}" y="${positionNetzOutY}" width="${balkenBreite}" height="${balkenHoeheNetzOut}" stroke="${colors.netz}" fill="${colors.netz}" stroke-width="3"/>
+                   <text transform="matrix(1.0 0.0 0.0 1.0 ${positionNetzOutLabelX}.0 ${positionNetzOutLabelY}.0)" y="12.0" font-size="12" font-family="Helvetica-Bold, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">Verkauf</text>
+                   <text transform="matrix(1.0 0.0 0.0 1.0 ${positionNetzOutWertX}.0 ${positionNetzOutWertY}.0)" y="12.0" font-size="12" font-family="Helvetica, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">${wirkLeistungNetzOut}</text>`;
+
+            // Batterie in
+            const xOffsetBatterieIn = wirkLeistungBatterieIn >= 10 ? 0 : 5;
+            const positionBatterieInY = positionNullLinie + 6;
+            const positionBatterieInX = 35 + (2 * balkenBreite);
+            const balkenHoeheBatterieIn = Math.floor(wirkLeistungBatterieIn * pixelProKWh);
+            const positionBatterieInLabelY = positionBatterieInY + balkenHoeheBatterieIn + 3;
+            const positionBatterieInLabelX = Math.floor(positionBatterieInX + (balkenBreite / 2) - 18);
+            const positionBatterieInWertY = positionBatterieInY + balkenHoeheBatterieIn + 15;
+            const positionBatterieInWertX = Math.floor(positionBatterieInX + (balkenBreite / 2) - 14 + xOffsetBatterieIn);
+
+            svg += `<rect x="${positionBatterieInX}" y="${positionBatterieInY}" width="${balkenBreite}" height="${balkenHoeheBatterieIn}" stroke="${colors.batterie}" fill="${colors.batterie}" stroke-width="3"/>
+                   <text transform="matrix(1.0 0.0 0.0 1.0 ${positionBatterieInLabelX}.0 ${positionBatterieInLabelY}.0)" y="12.0" font-size="12" font-family="Helvetica-Bold, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">Laden</text>
+                   <text transform="matrix(1.0 0.0 0.0 1.0 ${positionBatterieInWertX}.0 ${positionBatterieInWertY}.0)" y="12.0" font-size="12" font-family="Helvetica, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">${wirkLeistungBatterieIn}</text>`;
+
+            svg += '</svg>';
+            return svg;
+        }
+        
+        // Chart aktualisieren
+        function updateChart() {
+            try {
+                const values = getValues();
+                const svg = generateSVG(values);
+                
+                const container = document.getElementById('chart-container');
+                if (container) {
+                    container.innerHTML = svg;
+                }
+                
+                updateConfigOutput();
+                showStatus('Karte erfolgreich aktualisiert', 'success');
+            } catch (error) {
+                showStatus(`Fehler beim Aktualisieren: ${error.message}`, 'error');
+                console.error('Fehler:', error);
+            }
+        }
+        
+        // Werte zurücksetzen
+        function resetValues() {
+            loadPreset('normal');
+            document.getElementById('box_height').value = 300;
+            document.getElementById('box_width').value = 182;
+            document.getElementById('skin_mode').value = 0;
+            updateChart();
+            showStatus('Werte zurückgesetzt', 'info');
+        }
+        
+        // Dark Mode umschalten
+        function toggleDarkMode() {
+            const body = document.body;
+            const isDark = body.classList.contains('dark-mode');
+            
+            if (isDark) {
+                body.classList.remove('dark-mode');
+                showStatus('Light Mode aktiviert', 'info');
+            } else {
+                body.classList.add('dark-mode');
+                showStatus('Dark Mode aktiviert', 'info');
+            }
+            
+            // Karte neu rendern mit neuen Farben
+            updateChart();
+        }
+        
+        // Konfigurationsausgabe aktualisieren
+        function updateConfigOutput() {
+            const configYaml = `type: custom:daily-energy-balance-card
+entities:
+  pv_power: sensor.pv_power
+  grid_import: sensor.grid_import
+  grid_export: sensor.grid_export
+  battery_charge: sensor.battery_charge
+  battery_discharge: sensor.battery_discharge
+  consumption: sensor.consumption
+  auto_consumption: sensor.auto_consumption
+  skin_mode: sensor.skin_mode
+title: "Energiebilanz"
+show_title: true
+box_height: ${document.getElementById('box_height').value}
+box_width: ${document.getElementById('box_width').value}`;
+            
+            document.getElementById('config-output').textContent = configYaml;
+        }
+        
+        // Status anzeigen
+        function showStatus(message, type) {
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = message;
+            statusElement.className = `status ${type}`;
+            
+            // Status nach 3 Sekunden ausblenden
+            setTimeout(() => {
+                statusElement.className = 'status info';
+                statusElement.textContent = 'Karte bereit. Klicken Sie auf "Karte aktualisieren" um die Änderungen zu sehen.';
+            }, 3000);
+        }
+        
+        // Initialisierung beim Laden der Seite
+        document.addEventListener('DOMContentLoaded', function() {
+            updateChart();
+            showStatus('Testumgebung bereit', 'success');
+        });
+    </script>
+</body>
+</html>

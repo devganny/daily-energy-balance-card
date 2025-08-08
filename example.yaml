@@ -1,0 +1,28 @@
+# Beispiel-Konfiguration für die Daily Energy Balance Card
+# Fügen Sie diese Konfiguration zu Ihrem Lovelace Dashboard hinzu
+
+type: custom:daily-energy-balance-card
+entities:
+  # PV-Anlage
+  pv_power: sensor.solar_power
+  
+  # Netzbezug und -einspeisung
+  grid_import: sensor.grid_import_power
+  grid_export: sensor.grid_export_power
+  
+  # Batteriespeicher
+  battery_charge: sensor.battery_charge_power
+  battery_discharge: sensor.battery_discharge_power
+  
+  # Verbrauch
+  consumption: sensor.total_consumption
+  auto_consumption: sensor.ev_charging_power
+  
+  # Skin-Modus (optional)
+  skin_mode: sensor.theme_mode
+
+# Karten-Einstellungen
+title: "Tägliche Energiebilanz"
+show_title: true
+box_height: 350
+box_width: 200
