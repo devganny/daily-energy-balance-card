@@ -1,0 +1,44 @@
+# Beispiel-Konfiguration für die Daily Energy Balance Card in der Abschnitte-Ansicht
+# Fügen Sie diese Konfiguration zu Ihrem Abschnitte-Dashboard hinzu
+
+# Als einzelne Karte in einem Abschnitt
+type: custom:daily-energy-balance-card
+entities:
+  # PV-Anlage
+  pv_power: sensor.power_solar
+  
+  # Netzbezug und -einspeisung
+  grid_import: sensor.power_grid_in
+  grid_export: sensor.power_grid_out
+  
+  # Batteriespeicher
+  battery_charge: sensor.power_battery_in
+  battery_discharge: sensor.power_battery_out
+  
+  # Verbrauch
+  consumption: sensor.power_consumption
+  auto_consumption: sensor.power_solar_used_by_wallbox
+
+# Karten-Einstellungen
+title: "Energiebilanz"
+show_title: true
+
+# Hinweis: Die Karte passt sich automatisch an die Abschnitte-Größe an
+# und erkennt automatisch den Dark/Light Mode
+
+# Alternative: Als Teil eines Abschnitts mit anderen Karten
+# - type: custom:daily-energy-balance-card
+#   entities:
+#     pv_power: sensor.power_solar
+#     grid_import: sensor.power_grid_in
+#     grid_export: sensor.power_grid_out
+#     battery_charge: sensor.power_battery_in
+#     battery_discharge: sensor.power_battery_out
+#     consumption: sensor.power_consumption
+#     auto_consumption: sensor.power_solar_used_by_wallbox
+#   title: "Energiebilanz"
+#   show_title: true
+# - type: entities
+#   entities:
+#     - entity: sensor.power_solar
+#     - entity: sensor.power_consumption
