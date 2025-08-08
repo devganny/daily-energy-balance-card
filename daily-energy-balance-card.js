@@ -26,6 +26,7 @@ class DailyEnergyBalanceCard extends HTMLElement {
   set hass(hass) {
     try {
       this.hass = hass;
+      // In HA-Umgebung: Sofortiges Update ohne Timeout
       this.updateContent();
     } catch (error) {
       console.error('Fehler in set hass:', error);
@@ -161,7 +162,7 @@ class DailyEnergyBalanceCard extends HTMLElement {
 
   updateContent() {
     try {
-      if (!this.hass) return;
+      if (!this.hass || !this.config) return;
 
       const values = this.getEntityValues();
       const svg = this.generateSVG(values);
@@ -187,9 +188,16 @@ class DailyEnergyBalanceCard extends HTMLElement {
       const getValue = (entityId) => {
         if (!entityId) return 0;
         const entity = hass.states[entityId];
-        if (!entity) return 0;
+        if (!entity) {
+          console.warn(`Entity ${entityId} nicht gefunden`);
+          return 0;
+        }
         const value = parseFloat(entity.state);
-        return isNaN(value) ? 0 : Math.round(value * 10) / 10;
+        if (isNaN(value)) {
+          console.warn(`Entity ${entityId} hat ungültigen Wert: ${entity.state}`);
+          return 0;
+        }
+        return Math.round(value * 10) / 10;
       };
 
       const wirkLeistungAuto = getValue(entities.auto_consumption);
@@ -228,31 +236,18 @@ class DailyEnergyBalanceCard extends HTMLElement {
 
   isDarkMode() {
     try {
-      const card = this.shadowRoot.querySelector('.card');
-      if (!card) return false;
-      
-      const computedStyle = window.getComputedStyle(card);
-      const backgroundColor = computedStyle.backgroundColor;
-      
-      if (backgroundColor) {
-        const rgb = backgroundColor.match(/\d+/g);
-        if (rgb && rgb.length >= 3) {
-          const r = parseInt(rgb[0]);
-          const g = parseInt(rgb[1]);
-          const b = parseInt(rgb[2]);
-          const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-          return brightness < 128;
-        }
-      }
-      
-      const primaryTextColor = getComputedStyle(document.documentElement)
+      // HA-spezifische Dark Mode Erkennung
+      const root = document.querySelector('home-assistant') || document.documentElement;
+      const primaryTextColor = getComputedStyle(root)
         .getPropertyValue('--primary-text-color');
       
       if (primaryTextColor) {
         return primaryTextColor.includes('255') || primaryTextColor.includes('fff');
       }
       
-      return false;
+      // Fallback: Prüfe HA-spezifische Klassen
+      return document.body.classList.contains('dark') || 
+             document.querySelector('home-assistant')?.shadowRoot?.querySelector('.dark') !== null;
     } catch (error) {
       console.error('Fehler in isDarkMode:', error);
       return false;
@@ -283,29 +278,9 @@ class DailyEnergyBalanceCard extends HTMLElement {
       const isDark = this.isDarkMode();
       const skinColor = isDark ? '#ffffff' : '#333333';
 
-      const container = this.shadowRoot.querySelector('.chart-container');
+      // Feste Größe um Rekursion zu vermeiden
       let boxBreite = 182;
       let boxHoehe = 300;
-      
-      if (container) {
-        const rect = container.getBoundingClientRect();
-        if (rect.width > 0 && rect.height > 0) {
-          const aspectRatio = 182 / 300;
-          const maxWidth = rect.width - 32;
-          const maxHeight = rect.height - 32;
-          
-          if (maxWidth / aspectRatio <= maxHeight) {
-            boxBreite = maxWidth;
-            boxHoehe = maxWidth / aspectRatio;
-          } else {
-            boxHoehe = maxHeight;
-            boxBreite = maxHeight * aspectRatio;
-          }
-          
-          boxBreite = Math.max(boxBreite, 120);
-          boxHoehe = Math.max(boxHoehe, 200);
-        }
-      }
 
       const offsetRand = Math.floor(boxHoehe * 0.11);
       const balkenBreite = Math.floor((boxBreite - 40) / 3);
