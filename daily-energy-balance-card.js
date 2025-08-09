@@ -2,7 +2,8 @@ class DailyEnergyBalanceCard extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-  }
+  
+    this._hass = null;}
 
   setConfig(config) {
     if (!config.entities) {
@@ -19,8 +20,16 @@ class DailyEnergyBalanceCard extends HTMLElement {
   }
 
   set hass(hass) {
-    this.hass = hass;
+    this._hass = hass;
     this.updateContent();
+  }
+
+  get hass() {
+    return this._hass;
+  }
+
+  getCardSize() {
+    return 3;
   }
 
   render() {
@@ -123,7 +132,7 @@ class DailyEnergyBalanceCard extends HTMLElement {
   }
 
   updateContent() {
-    if (!this.hass || !this.config) return;
+    if (!this._hass || !this.config) return;
 
     try {
       const values = this.getEntityValues();
@@ -144,7 +153,7 @@ class DailyEnergyBalanceCard extends HTMLElement {
 
   getEntityValues() {
     const entities = this.config.entities;
-    const hass = this.hass;
+    const hass = this._hass;
 
     const getValue = (entityId) => {
       if (!entityId) return 0;
