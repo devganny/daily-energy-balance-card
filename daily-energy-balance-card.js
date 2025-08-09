@@ -1,24 +1,32 @@
 class DailyEnergyBalanceCard extends HTMLElement {
-  getCardSize() { return 3; }
+  _forceLabelColors(svg, labelsColor, autoLabelColor) {
+    try {
+      // null line: class or stroke fallback
+      svg = svg.replace(/<rect([^>]*y=\"\$\{positionNullLinie\}[^>]*)>/, 
+                        (m, attrs) => `<rect class="debc-null" ${attrs} stroke="${labelsColor}" fill="${labelsColor}" />`);
+
+      // ensure all <text> have white fill, then recolor auto texts
+      svg = svg.replace(/<text([^>]*)>/g, (m, attrs) => {
+        // preserve transforms etc., enforce inline style for priority
+        if (/auto/i.test(m)) {
+          if (/style=/.test(attrs)) return `<text ${attrs} style="fill:${autoLabelColor} !important">`;
+          return `<text ${attrs} style="fill:${autoLabelColor} !important">`;
+        } else {
+          if (/style=/.test(attrs)) return `<text ${attrs} style="fill:${labelsColor} !important">`;
+          return `<text ${attrs} style="fill:${labelsColor} !important">`;
+        }
+      });
+      svg = this._forceLabelColors(svg, labelsColor, autoLabelColor);
+    return svg;
+    } catch(e) { svg = this._forceLabelColors(svg, labelsColor, autoLabelColor);
+    return svg; }
+  }
+
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
   
     this._hass = null;}
-
-  // Default color palette
-  _defaultColors() {
-    return {
-      pv: '#FF8C00',
-      netz: '#4682B4',
-      batterie: '#32CD32',
-      verbrauchHaus: '#BABABA',   // Haus
-      verbrauchAuto: '#E0E0E0',   // Auto
-      labels: '#FFFFFF',
-      autoLabel: '#FFD54F'        // Auto-Label hervorgehoben
-    };
-  }
-
 
   setConfig(config) {
     if (!config.entities) {
@@ -30,9 +38,6 @@ class DailyEnergyBalanceCard extends HTMLElement {
       show_title: true,
       ...config
     };
-    // Farben mergen (Konfig überschreibt Defaults)
-    this.config.colors = { ...this._defaultColors(), ...(config.colors || {}) };
-
 
     this.render();
   }
@@ -208,11 +213,20 @@ class DailyEnergyBalanceCard extends HTMLElement {
       wirkLeistungBatterieIn
     } = values;
 
-    const colors = (this.config && this.config.colors) ? this.config.colors : this._defaultColors();
+    const defaultColors = { verbrauchAuto: "#BABABA",
+      pv: "#FF8C00",
+      netz: "#4682B4",
+      batterie: "#32CD32",
+      verbrauchHaus: "#E0E0E0"
+     };
+const cfgColors = (this.config && this.config.colors) ? this.config.colors : {};
+const colors = { ...defaultColors, ...cfgColors };
+const labelsColor = cfgColors.labels || '#FFFFFF';
+const autoLabelColor = cfgColors.autoLabel || '#FFD54F';
 
     // Einfache Dark Mode Erkennung
     const isDark = document.body.classList.contains('dark');
-    const skinColor = '#FFFFFF';
+    const skinColor = labelsColor;
 
     // Feste Größe
     const boxBreite = 182;
@@ -227,18 +241,11 @@ class DailyEnergyBalanceCard extends HTMLElement {
     const positionNullLinie = Math.floor(offsetRand + (maxWertBezug * pixelProKWh));
 
     // SVG generieren
-    /* SVG START */
-const __debc_colors = (this.config && this.config.colors) ? this.config.colors : (this._defaultColors ? this._defaultColors() : {});
-let svg = `<svg style="color:${__debc_colors.labels || '#FFFFFF'}" width="${boxBreite}px" height="${boxHoehe}px" viewBox="0 0 ${boxBreite} ${boxHoehe}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
-<style>
-.debc-label{fill:${__debc_colors.labels || '#FFFFFF'} !important}
-.debc-auto{fill:${__debc_colors.autoLabel || '#FFD54F'} !important}
-.debc-null{stroke:${__debc_colors.labels || '#FFFFFF'} !important; fill:${__debc_colors.labels || '#FFFFFF'} !important}
-</style>` width="${boxBreite}px" height="${boxHoehe}px" viewBox="0 0 ${boxBreite} ${boxHoehe}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">`;
+    let svg = `<svg width="${boxBreite}px" height="${boxHoehe}px" viewBox="0 0 ${boxBreite} ${boxHoehe}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">`;
 
     // Null-Linie
     const breiteNullLinie = boxBreite - 9;
-    svg += `<rect class="debc-null" x="4" y="${positionNullLinie}" width="${breiteNullLinie}" height="1" stroke="${__debc_colors.labels || '#FFFFFF'}" fill="${__debc_colors.labels || '#FFFFFF'}" stroke-width="1"/>`;
+    svg += `<rect x="4" y="${positionNullLinie}" width="${breiteNullLinie}" height="1" stroke="${skinColor}" fill="${skinColor}" stroke-width="1"/>`;
 
     // PV Balken
     const xOffsetPV = wirkLeistungPV >= 10 ? 0 : 5;
@@ -251,8 +258,8 @@ let svg = `<svg style="color:${__debc_colors.labels || '#FFFFFF'}" width="${boxB
     const positionPVWertX = Math.floor(positionPVx + (balkenBreite / 2) - 14 + xOffsetPV);
 
     svg += `<rect x="${positionPVx}" y="${positionPVy}" width="${balkenBreite}" height="${balkenHoehePV}" stroke="${colors.pv}" fill="${colors.pv}" stroke-width="3"/>
-           <text class=\"debc-label\" transform="matrix(1.0 0.0 0.0 1.0 ${positionPVLabelX}.0 ${positionPVLabelY}.0)" y="12.0" font-size="12" font-family="Helvetica-Bold, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125" fill="${colors.labels}">PV</text>
-           <text class=\"debc-label\" transform="matrix(1.0 0.0 0.0 1.0 ${positionPVWertX}.0 ${positionPVWertY}.0)" y="12.0" font-size="12" font-family="Helvetica, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125" fill="${colors.labels}">${wirkLeistungPV}</text>`;
+           <text transform="matrix(1.0 0.0 0.0 1.0 ${positionPVLabelX}.0 ${positionPVLabelY}.0)" y="12.0" font-size="12" font-family="Helvetica-Bold, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">PV</text>
+           <text transform="matrix(1.0 0.0 0.0 1.0 ${positionPVWertX}.0 ${positionPVWertY}.0)" y="12.0" font-size="12" font-family="Helvetica, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">${wirkLeistungPV}</text>`;
 
     // Netz in
     const xOffsetNetzIn = wirkLeistungNetzIn >= 10 ? 0 : 5;
@@ -265,8 +272,8 @@ let svg = `<svg style="color:${__debc_colors.labels || '#FFFFFF'}" width="${boxB
     const positionNetzInWertX = Math.floor(positionNetzInX + (balkenBreite / 2) - 16 + xOffsetNetzIn);
 
     svg += `<rect x="${positionNetzInX}" y="${positionNetzInY}" width="${balkenBreite}" height="${balkenHoeheNetzIn}" stroke="${colors.netz}" fill="${colors.netz}" stroke-width="3"/>
-           <text class=\"debc-label\" transform="matrix(1.0 0.0 0.0 1.0 ${positionNetzInLabelX}.0 ${positionNetzInLabelY}.0)" y="12.0" font-size="12" font-family="Helvetica-Bold, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125" fill="${colors.labels}">Kauf</text>
-           <text class=\"debc-label\" transform="matrix(1.0 0.0 0.0 1.0 ${positionNetzInWertX}.0 ${positionNetzInWertY}.0)" y="12.0" font-size="12" font-family="Helvetica, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125" fill="${colors.labels}">${wirkLeistungNetzIn}</text>`;
+           <text transform="matrix(1.0 0.0 0.0 1.0 ${positionNetzInLabelX}.0 ${positionNetzInLabelY}.0)" y="12.0" font-size="12" font-family="Helvetica-Bold, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">Kauf</text>
+           <text transform="matrix(1.0 0.0 0.0 1.0 ${positionNetzInWertX}.0 ${positionNetzInWertY}.0)" y="12.0" font-size="12" font-family="Helvetica, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">${wirkLeistungNetzIn}</text>`;
 
     // Batterie out
     const xOffsetBatterieOut = wirkLeistungBatterieOut >= 10 ? 0 : 5;
@@ -279,8 +286,8 @@ let svg = `<svg style="color:${__debc_colors.labels || '#FFFFFF'}" width="${boxB
     const positionBatterieOutWertX = Math.floor(positionBatterieOutX + (balkenBreite / 2) - 14 + xOffsetBatterieOut);
 
     svg += `<rect x="${positionBatterieOutX}" y="${positionBatterieOutY}" width="${balkenBreite}" height="${balkenHoeheBatterieOut}" stroke="${colors.batterie}" fill="${colors.batterie}" stroke-width="3"/>
-           <text class=\"debc-label\" transform="matrix(1.0 0.0 0.0 1.0 ${positionBatterieOutLabelX}.0 ${positionBatterieOutLabelY}.0)" y="12.0" font-size="12" font-family="Helvetica-Bold, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125" fill="${colors.labels}">Entladen</text>
-           <text class=\"debc-label\" transform="matrix(1.0 0.0 0.0 1.0 ${positionBatterieOutWertX}.0 ${positionBatterieOutWertY}.0)" y="12.0" font-size="12" font-family="Helvetica, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125" fill="${colors.labels}">${wirkLeistungBatterieOut}</text>`;
+           <text transform="matrix(1.0 0.0 0.0 1.0 ${positionBatterieOutLabelX}.0 ${positionBatterieOutLabelY}.0)" y="12.0" font-size="12" font-family="Helvetica-Bold, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">Entladen</text>
+           <text transform="matrix(1.0 0.0 0.0 1.0 ${positionBatterieOutWertX}.0 ${positionBatterieOutWertY}.0)" y="12.0" font-size="12" font-family="Helvetica, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">${wirkLeistungBatterieOut}</text>`;
 
     // Verbrauch Haus Balken
     const positionVerbrauchHausY = positionNullLinie + 6;
@@ -302,9 +309,9 @@ let svg = `<svg style="color:${__debc_colors.labels || '#FFFFFF'}" width="${boxB
     const positionVerbrauchAutoWertX = Math.floor(positionVerbrauchAutoX + (balkenBreite / 2) - 26);
 
     svg += `<rect x="${positionVerbrauchAutoX}" y="${positionVerbrauchAutoY}" width="${balkenBreite}" height="${balkenHoeheVerbrauchAuto}" stroke="${colors.verbrauchAuto}" fill="${colors.verbrauchAuto}" stroke-width="3"/>
-           <text class=\"debc-label\" transform="matrix(1.0 0.0 0.0 1.0 ${positionVerbrauchHausLabelX}.0 ${positionVerbrauchAutoLabelY}.0)" y="12.0" font-size="12" font-family="Helvetica-Bold, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125" fill="${colors.labels}">Haus/</text>
-           <text class=\"debc-label\" transform="matrix(1.0 0.0 0.0 1.0 ${positionVerbrauchAutoLabelX}.0 ${positionVerbrauchAutoLabelY}.0)" y="12.0" font-size="12" font-family="Helvetica-Bold, Helvetica" fill="${colors.verbrauchAuto}" text-decoration="none" x="1.65283203125" fill="${colors.autoLabel}">Auto</text>
-           <text class=\"debc-label\" transform="matrix(1.0 0.0 0.0 1.0 ${positionVerbrauchAutoWertX}.0 ${positionVerbrauchAutoWertY}.0)" y="12.0" font-size="12" font-family="Helvetica, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125" fill="${colors.autoLabel}">${wirkLeistungHaus} / ${wirkLeistungAuto}</text>`;
+           <text transform="matrix(1.0 0.0 0.0 1.0 ${positionVerbrauchHausLabelX}.0 ${positionVerbrauchAutoLabelY}.0)" y="12.0" font-size="12" font-family="Helvetica-Bold, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">Haus/</text>
+           <text transform="matrix(1.0 0.0 0.0 1.0 ${positionVerbrauchAutoLabelX}.0 ${positionVerbrauchAutoLabelY}.0)" y="12.0" font-size="12" font-family="Helvetica-Bold, Helvetica" fill="${colors.verbrauchAuto}" text-decoration="none" x="1.65283203125">Auto</text>
+           <text transform="matrix(1.0 0.0 0.0 1.0 ${positionVerbrauchAutoWertX}.0 ${positionVerbrauchAutoWertY}.0)" y="12.0" font-size="12" font-family="Helvetica, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">${wirkLeistungHaus} / ${wirkLeistungAuto}</text>`;
 
     // Netz out
     const xOffsetNetzOut = wirkLeistungNetzOut >= 10 ? 0 : 5;
@@ -317,8 +324,8 @@ let svg = `<svg style="color:${__debc_colors.labels || '#FFFFFF'}" width="${boxB
     const positionNetzOutWertX = Math.floor(positionNetzInX + (balkenBreite / 2) - 14 + xOffsetNetzOut);
 
     svg += `<rect x="${positionNetzOutX}" y="${positionNetzOutY}" width="${balkenBreite}" height="${balkenHoeheNetzOut}" stroke="${colors.netz}" fill="${colors.netz}" stroke-width="3"/>
-           <text class=\"debc-label\" transform="matrix(1.0 0.0 0.0 1.0 ${positionNetzOutLabelX}.0 ${positionNetzOutLabelY}.0)" y="12.0" font-size="12" font-family="Helvetica-Bold, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125" fill="${colors.labels}">Verkauf</text>
-           <text class=\"debc-label\" transform="matrix(1.0 0.0 0.0 1.0 ${positionNetzOutWertX}.0 ${positionNetzOutWertY}.0)" y="12.0" font-size="12" font-family="Helvetica, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125" fill="${colors.labels}">${wirkLeistungNetzOut}</text>`;
+           <text transform="matrix(1.0 0.0 0.0 1.0 ${positionNetzOutLabelX}.0 ${positionNetzOutLabelY}.0)" y="12.0" font-size="12" font-family="Helvetica-Bold, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">Verkauf</text>
+           <text transform="matrix(1.0 0.0 0.0 1.0 ${positionNetzOutWertX}.0 ${positionNetzOutWertY}.0)" y="12.0" font-size="12" font-family="Helvetica, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">${wirkLeistungNetzOut}</text>`;
 
     // Batterie in
     const xOffsetBatterieIn = wirkLeistungBatterieIn >= 10 ? 0 : 5;
@@ -331,10 +338,11 @@ let svg = `<svg style="color:${__debc_colors.labels || '#FFFFFF'}" width="${boxB
     const positionBatterieInWertX = Math.floor(positionBatterieInX + (balkenBreite / 2) - 14 + xOffsetBatterieIn);
 
     svg += `<rect x="${positionBatterieInX}" y="${positionBatterieInY}" width="${balkenBreite}" height="${balkenHoeheBatterieIn}" stroke="${colors.batterie}" fill="${colors.batterie}" stroke-width="3"/>
-           <text class=\"debc-label\" transform="matrix(1.0 0.0 0.0 1.0 ${positionBatterieInLabelX}.0 ${positionBatterieInLabelY}.0)" y="12.0" font-size="12" font-family="Helvetica-Bold, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125" fill="${colors.labels}">Laden</text>
-           <text class=\"debc-label\" transform="matrix(1.0 0.0 0.0 1.0 ${positionBatterieInWertX}.0 ${positionBatterieInWertY}.0)" y="12.0" font-size="12" font-family="Helvetica, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125" fill="${colors.labels}">${wirkLeistungBatterieIn}</text>`;
+           <text transform="matrix(1.0 0.0 0.0 1.0 ${positionBatterieInLabelX}.0 ${positionBatterieInLabelY}.0)" y="12.0" font-size="12" font-family="Helvetica-Bold, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">Laden</text>
+           <text transform="matrix(1.0 0.0 0.0 1.0 ${positionBatterieInWertX}.0 ${positionBatterieInWertY}.0)" y="12.0" font-size="12" font-family="Helvetica, Helvetica" fill="${skinColor}" text-decoration="none" x="1.65283203125">${wirkLeistungBatterieIn}</text>`;
 
     svg += '</svg>';
+    svg = this._forceLabelColors(svg, labelsColor, autoLabelColor);
     return svg;
   }
 
