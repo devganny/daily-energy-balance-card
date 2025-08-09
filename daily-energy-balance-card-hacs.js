@@ -341,3 +341,4 @@ window.customCards.push({
 
 // Custom Element registrieren
 customElements.define('daily-energy-balance-card', DailyEnergyBalanceCard);
+

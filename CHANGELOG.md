@@ -30,3 +30,4 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 - Shadow DOM für CSS-Isolation
 - HomeAssistant Lovelace Card API
 - HACS-kompatible Struktur
+

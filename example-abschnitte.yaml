@@ -42,3 +42,4 @@ show_title: true
 #   entities:
 #     - entity: sensor.power_solar
 #     - entity: sensor.power_consumption
+

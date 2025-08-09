@@ -159,3 +159,4 @@ Bei Problemen oder Fragen:
 1. Laden Sie die neueste Version herunter
 2. Ersetzen Sie die alte `daily-energy-balance-card.js`
 3. Starten Sie HomeAssistant neu
+

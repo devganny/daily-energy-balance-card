@@ -32,6 +32,27 @@ class DailyEnergyBalanceCard extends HTMLElement {
     return 3;
   }
 
+  static getConfigElement() {
+    return document.createElement('daily-energy-balance-card-editor');
+  }
+
+  static getStubConfig(hass, entities, entitiesFallback) {
+    // Try to prefill with energy-related sensors
+    const all = hass && hass.states ? Object.keys(hass.states) : [];
+    const energySensors = all.filter(e => e.startsWith('sensor.') && (hass.states[e].attributes?.device_class === 'energy' || /(energy|verbrauch|erzeug)/i.test(e)));
+    return {
+      title: "Today's Energy Balance",
+      show_title: true,
+      entities: {
+        consumption: energySensors[0] || '',
+        production: energySensors[1] || '',
+        grid_in: energySensors[2] || '',
+        grid_out: energySensors[3] || ''
+      }
+    };
+  }
+
+
   render() {
     this.shadowRoot.innerHTML = `
       <style>
@@ -39,11 +60,25 @@ class DailyEnergyBalanceCard extends HTMLElement {
           display: block;
           font-family: var(--ha-card-font-family, Helvetica, Arial, sans-serif);
         }
+        /* Color tokens */
+        :host {
+          --debc-label-color: var(--primary-text-color);
+          --debc-muted-color: var(--secondary-text-color);
+        }
+        @media (prefers-color-scheme: dark) {
+          :host {
+            /* brighter labels in dark mode */
+            --debc-label-color: #e9e9e9;
+            --debc-muted-color: #c7c7c7;
+          }
+        }
         
         .card {
+          color: var(--debc-label-color);
           background: var(--ha-card-background, var(--card-background-color, #fff));
           border-radius: var(--ha-card-border-radius, 12px);
           box-shadow: var(--ha-card-box-shadow, none);
+          padding: var(--tile-padding, 12px);
           overflow: hidden;
           position: relative;
           height: 100%;
@@ -354,3 +389,117 @@ window.customCards.push({
 
 // Custom Element registrieren
 customElements.define('daily-energy-balance-card', DailyEnergyBalanceCard);
+
+
+
+class DailyEnergyBalanceCardEditor extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+    this._config = {};
+    this._hass = null;
+  }
+
+  setConfig(config) {
+    this._config = { show_title: true, ...config };
+    this._render();
+  }
+
+  set hass(hass) {
+    this._hass = hass;
+    this._render();
+  }
+
+  _update(key, value) {
+    this._config = { ...this._config, [key]: value };
+    this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this._config } }));
+    this._render();
+  }
+
+  _updateEntity(key, ev) {
+    const val = ev.detail?.value ?? ev.target?.value;
+    const entities = { ...(this._config.entities || {}) , [key]: val || '' };
+    this._update('entities', entities);
+  }
+
+  _render() {
+    if (!this.shadowRoot) return;
+    const cfg = this._config || {};
+    const ents = cfg.entities || {};
+
+    const style = `
+      <style>
+        .editor {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 12px;
+          padding: 12px;
+        }
+        .row {
+          display: grid;
+          gap: 8px;
+        }
+        ha-entity-picker, ha-textfield {
+          width: 100%;
+        }
+        label {
+          font-size: 0.85rem;
+          color: var(--secondary-text-color);
+        }
+      </style>
+    `;
+
+    // Use HA components if available, but fall back to native inputs
+    const titleField = `
+      <div class="row">
+        <label>Title</label>
+        <ha-textfield .value="${cfg.title ?? ''}" placeholder="Today's Energy Balance"
+          @input="${(e)=>{}}" ></ha-textfield>
+      </div>`;
+
+    // We can't bind events directly in a string; reconstruct below.
+    this.shadowRoot.innerHTML = style + `
+      <div class="editor">
+        <div class="row">
+          <label>Title</label>
+          <ha-textfield id="title" value="${cfg.title ?? ''}" placeholder="Today's Energy Balance"></ha-textfield>
+        </div>
+        <div class="row">
+          <label>Show title</label>
+          <ha-switch id="show_title" ${cfg.show_title !== false ? 'checked' : ''}></ha-switch>
+        </div>
+        <div class="row">
+          <label>Consumption entity</label>
+          <ha-entity-picker id="consumption" .hass="${this._hass}" value="${ents.consumption ?? ''}" allow-custom-entity></ha-entity-picker>
+        </div>
+        <div class="row">
+          <label>Production entity</label>
+          <ha-entity-picker id="production" .hass="${this._hass}" value="${ents.production ?? ''}" allow-custom-entity></ha-entity-picker>
+        </div>
+        <div class="row">
+          <label>Grid import entity</label>
+          <ha-entity-picker id="grid_in" .hass="${this._hass}" value="${(ents.grid_in ?? '')}" allow-custom-entity></ha-entity-picker>
+        </div>
+        <div class="row">
+          <label>Grid export entity</label>
+          <ha-entity-picker id="grid_out" .hass="${this._hass}" value="${(ents.grid_out ?? '')}" allow-custom-entity></ha-entity-picker>
+        </div>
+      </div>
+    `;
+
+    // Attach listeners
+    const $ = (id) => this.shadowRoot.getElementById(id);
+    const titleEl = $('title');
+    if (titleEl) titleEl.addEventListener('input', (e) => this._update('title', e.target.value));
+    const showTitleEl = $('show_title');
+    if (showTitleEl) showTitleEl.addEventListener('change', (e) => this._update('show_title', e.target.checked));
+    const fields = ['consumption','production','grid_in','grid_out'];
+    fields.forEach(f => {
+      const el = $(f);
+      if (el) el.addEventListener('value-changed', (ev) => this._updateEntity(f, ev));
+      if (el) el.addEventListener('change', (ev) => this._updateEntity(f, ev));
+      if (this._hass) el.hass = this._hass;
+    });
+  }
+}
+customElements.define('daily-energy-balance-card-editor', DailyEnergyBalanceCardEditor);
