@@ -54,6 +54,7 @@ class DailyEnergyBalanceCard extends HTMLElement {
       <style>
         :host {
           display: block;
+          height: 100%;
           font-family: var(--ha-card-font-family, Helvetica, Arial, sans-serif);
         }
         
@@ -104,17 +105,15 @@ class DailyEnergyBalanceCard extends HTMLElement {
         
         .chart-container {
           position: relative;
-          display: inline-block;
+          display: block;
           width: 100%;
           height: 100%;
-          min-height: 150px;
         }
-        
+
         .chart-container svg {
+          display: block;
           width: 100%;
           height: 100%;
-          max-width: 100%;
-          max-height: 100%;
         }
         
         .loading {
@@ -242,7 +241,7 @@ const autoLabelColor = cfgColors.autoLabel || '#FFD54F';
     const positionNullLinie = Math.floor(offsetRand + (maxWertBezug * pixelProKWh));
 
     // SVG generieren
-    let svg = `<svg width="${boxBreite}px" height="${boxHoehe}px" viewBox="0 0 ${boxBreite} ${boxHoehe}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">`;
+    let svg = `<svg viewBox="0 0 ${boxBreite} ${boxHoehe}" preserveAspectRatio="xMidYMid meet" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">`;
 
     // Null-Linie
     const breiteNullLinie = boxBreite - 9;

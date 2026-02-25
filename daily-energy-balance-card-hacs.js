@@ -30,15 +30,19 @@ class DailyEnergyBalanceCard extends HTMLElement {
       <style>
         :host {
           display: block;
+          height: 100%;
           font-family: var(--ha-card-font-family, Helvetica, Arial, sans-serif);
         }
-        
+
         .card {
           background: var(--ha-card-background, var(--card-background-color, #fff));
           border-radius: var(--ha-card-border-radius, 16px);
           box-shadow: var(--ha-card-box-shadow, 0 1px 3px rgba(0, 0, 0, 0.06));
           overflow: hidden;
           position: relative;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
         }
 
         .card-header {
@@ -46,6 +50,7 @@ class DailyEnergyBalanceCard extends HTMLElement {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          flex-shrink: 0;
         }
 
         .card-title {
@@ -58,11 +63,13 @@ class DailyEnergyBalanceCard extends HTMLElement {
 
         .card-content {
           padding: 14px 16px 16px;
+          flex: 1;
           display: flex;
           justify-content: center;
           align-items: center;
+          min-height: 0;
         }
-        
+
         .energy-chart {
           width: 100%;
           height: 100%;
@@ -70,10 +77,18 @@ class DailyEnergyBalanceCard extends HTMLElement {
           justify-content: center;
           align-items: center;
         }
-        
+
         .chart-container {
           position: relative;
-          display: inline-block;
+          display: block;
+          width: 100%;
+          height: 100%;
+        }
+
+        .chart-container svg {
+          display: block;
+          width: 100%;
+          height: 100%;
         }
         
         .loading {
@@ -206,7 +221,7 @@ class DailyEnergyBalanceCard extends HTMLElement {
     const positionNullLinie = Math.floor(offsetRand + (maxWertBezug * pixelProKWh));
 
     // SVG generieren
-    let svg = `<svg width="${boxBreite}px" height="${boxHoehe}px" viewBox="0 0 ${boxBreite} ${boxHoehe}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">`;
+    let svg = `<svg viewBox="0 0 ${boxBreite} ${boxHoehe}" preserveAspectRatio="xMidYMid meet" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">`;
 
     // Null-Linie
     const breiteNullLinie = boxBreite - 9;
